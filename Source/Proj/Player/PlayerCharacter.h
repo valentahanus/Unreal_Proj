@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UCameraComponent;
+class UPhysicsConstraintComponent;
+
 UCLASS()
 class PROJ_API APlayerCharacter : public ACharacter
 {
@@ -26,6 +29,46 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-private:
-	void MyJump();
+protected:
+
+	// These thing are visible in blueprints
+	UPROPERTY(EditDefaultsOnly)
+	FVector2D PitchLimits;
+	
+	UPROPERTY(EditDefaultsOnly)
+	int32 PlayerSpeed;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 CharacterRotationSpeed;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UCameraComponent* Camera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPhysicsConstraintComponent* PhysicsConstraint;
+
+private: // Picking Up
+
+	void PickUp();
+
+	void Drop();
+
+private: // Movement
+
+	// Speeds up player speed 
+	void Run();
+
+	// Rotates camera left or right
+	void RotateCharacterHorizontal(float Axis);
+
+	// Rotates camera up or down
+	void RotateCameraVertical(float Axis);
+
+	// Moves character forward or backward
+	void MoveCharacterForward(float Axis);
+
+	// Moves character left or right
+	void MoveCharacterRight(float Axis);
+	
+	
 };
