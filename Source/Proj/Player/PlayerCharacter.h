@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Proj.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -34,7 +34,8 @@ protected:
 	// These thing are visible in blueprints
 	UPROPERTY(EditDefaultsOnly)
 	FVector2D PitchLimits;
-	
+
+	// Default player speed
 	UPROPERTY(EditDefaultsOnly)
 	int32 PlayerSpeed;
 
@@ -58,7 +59,7 @@ private: // Movement
 	// Speeds up player speed 
 	void Run();
 
-	// Rotates camera left or right
+	// Rotates Character left or right
 	void RotateCharacterHorizontal(float Axis);
 
 	// Rotates camera up or down
@@ -69,6 +70,4 @@ private: // Movement
 
 	// Moves character left or right
 	void MoveCharacterRight(float Axis);
-	
-	
 };

@@ -4,3 +4,5 @@
 
 #include "CoreMinimal.h"
 
+static constexpr ECollisionChannel PickUpChannel = ECollisionChannel::ECC_GameTraceChannel2;
+

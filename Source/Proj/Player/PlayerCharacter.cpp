@@ -41,7 +41,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Unreal input called functions
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::Jump);
 	PlayerInputComponent->BindAction("PickUp", EInputEvent::IE_Pressed, this, &APlayerCharacter::PickUp);
-	PlayerInputComponent->BindAction("Drop", EInputEvent::IE_Released, this, &APlayerCharacter::Drop);
+	PlayerInputComponent->BindAction("Drop", EInputEvent::IE_Pressed, this, &APlayerCharacter::Drop);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &APlayerCharacter::Run);
 	PlayerInputComponent->BindAxis("CameraHorizontal", this, &APlayerCharacter::RotateCharacterHorizontal);
 	PlayerInputComponent->BindAxis("CameraVertical", this, &APlayerCharacter::RotateCameraVertical);
@@ -67,7 +67,7 @@ void APlayerCharacter::PickUp()
 	FVector TraceOffset = CameraDirection * PickupRange;
 	FVector TraceLocation = CameraLocation + TraceOffset;
 	
-	bool ValidHit = GetWorld()->LineTraceSingleByChannel(TraceResult, CameraLocation, TraceLocation, ECollisionChannel::ECC_Camera, QueryParams);
+	bool ValidHit = GetWorld()->LineTraceSingleByChannel(TraceResult, CameraLocation, TraceLocation, PickUpChannel, QueryParams);
 
 	// Action called if it hits something
 	if (!TraceResult.GetActor())
@@ -75,9 +75,14 @@ void APlayerCharacter::PickUp()
 		return;
 	}
 
-	PhysicsConstraint->SetWorldLocation(TraceResult.GetComponent()->GetComponentLocation());
-
-	PhysicsConstraint->SetConstrainedComponents(Cast<UPrimitiveComponent>(GetRootComponent()), FName(), Cast<UPrimitiveComponent>(TraceResult.GetActor()->GetRootComponent()), FName());
+	TraceResult.GetActor()->SetActorLocation(TraceLocation);
+	
+	PhysicsConstraint->SetConstrainedComponents(
+		Cast<UPrimitiveComponent>(TraceResult.GetActor()->GetRootComponent()),
+		FName(),
+		Cast<UPrimitiveComponent>(Camera),
+		FName()
+	);
 }
 
 void APlayerCharacter::Drop()
