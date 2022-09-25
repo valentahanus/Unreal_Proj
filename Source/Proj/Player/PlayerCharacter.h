@@ -48,6 +48,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UPhysicsConstraintComponent* PhysicsConstraint;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UStaticMeshComponent* ConstraintDummy;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USceneComponent* ItemAnchor;
+
+protected: // VFX
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayPickUpVFX();
+	
 private: // Picking Up
 
 	void PickUp();

@@ -19,6 +19,12 @@ APlayerCharacter::APlayerCharacter()
 
 	PhysicsConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("PhysicsConstraint"));
 	PhysicsConstraint->SetupAttachment(Camera);
+
+	ConstraintDummy = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ConstraintDummy"));
+	ConstraintDummy->SetupAttachment(PhysicsConstraint);
+
+	ItemAnchor = CreateDefaultSubobject<USceneComponent>(TEXT("ItemAnchor"));
+	ItemAnchor->SetupAttachment(Camera);
 }
 
 // Called when the game starts or when spawned
@@ -75,14 +81,16 @@ void APlayerCharacter::PickUp()
 		return;
 	}
 
-	TraceResult.GetActor()->SetActorLocation(TraceLocation);
+	//TraceResult.GetActor()->SetActorLocation(TraceLocation);
 	
 	PhysicsConstraint->SetConstrainedComponents(
 		Cast<UPrimitiveComponent>(TraceResult.GetActor()->GetRootComponent()),
 		FName(),
-		Cast<UPrimitiveComponent>(Camera),
+		Cast<UPrimitiveComponent>(ConstraintDummy),
 		FName()
 	);
+
+	PlayPickUpVFX();
 }
 
 void APlayerCharacter::Drop()
