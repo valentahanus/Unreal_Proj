@@ -9,20 +9,30 @@
 class UCameraComponent;
 class UPhysicsConstraintComponent;
 
+DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, uint8);
+
 UCLASS()
 class PROJ_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
+
+	//
+	FOnWeaponSelectedDelegate OnWeaponSelected;
+
+public:
+	
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
 protected:
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -30,7 +40,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-
+	
 	// These thing are visible in blueprints
 	UPROPERTY(EditDefaultsOnly)
 	FVector2D PitchLimits;
@@ -54,6 +64,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	USceneComponent* ItemAnchor;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* PhysGun;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UChildActorComponent* Pistol;
+	
 protected: // VFX
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -64,6 +80,9 @@ private: // Picking Up
 	void PickUp();
 
 	void Drop();
+
+	void FirstSlotSelected();
+	void SecondSlotSelected();
 
 private: // Movement
 

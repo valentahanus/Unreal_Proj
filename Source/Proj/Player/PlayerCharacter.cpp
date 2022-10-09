@@ -25,6 +25,12 @@ APlayerCharacter::APlayerCharacter()
 
 	ItemAnchor = CreateDefaultSubobject<USceneComponent>(TEXT("ItemAnchor"));
 	ItemAnchor->SetupAttachment(Camera);
+
+	PhysGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PhysGun"));
+	PhysGun->SetupAttachment(ItemAnchor);
+
+	Pistol = CreateDefaultSubobject<UChildActorComponent>(TEXT("Pistol"));
+	Pistol->SetupAttachment(ItemAnchor);
 }
 
 // Called when the game starts or when spawned
@@ -53,6 +59,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("CameraVertical", this, &APlayerCharacter::RotateCameraVertical);
 	PlayerInputComponent->BindAxis("MoveCharacterForward", this, &APlayerCharacter::MoveCharacterForward);
 	PlayerInputComponent->BindAxis("MoveCharacterRight", this, &APlayerCharacter::MoveCharacterRight);
+	PlayerInputComponent->BindAction("FirstSlotSelected", IE_Pressed, this, &APlayerCharacter::FirstSlotSelected);
+	PlayerInputComponent->BindAction("SecondSlotSelected", IE_Pressed, this, &APlayerCharacter::SecondSlotSelected);
 }
 
 void APlayerCharacter::PickUp()
@@ -145,3 +153,20 @@ void APlayerCharacter::MoveCharacterRight(float Axis)
 	Direction *= Axis * PlayerSpeed * GetWorld()->GetDeltaSeconds();
 	GetCharacterMovement()->AddInputVector(Direction);
 }
+
+void APlayerCharacter::FirstSlotSelected()
+{
+	Pistol->SetHiddenInGame(true, true);
+	PhysGun->SetHiddenInGame(false, true);
+	
+	OnWeaponSelected.ExecuteIfBound(0);
+}
+
+void APlayerCharacter::SecondSlotSelected()
+{
+	PhysGun->SetHiddenInGame(true, true);
+	Pistol->SetHiddenInGame(false, true);
+	
+	OnWeaponSelected.ExecuteIfBound(1);
+}
+
