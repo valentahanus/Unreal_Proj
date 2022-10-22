@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Chaos/PBDSuspensionConstraintData.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 // Sets default values
@@ -37,12 +38,16 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	OnWeaponSelected.ExecuteIfBound(0);
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	Server_SendRotation(GetActorRotation().Yaw, GetActorRotation().Pitch);
 }
 
 // Called to bind functionality to input
@@ -59,8 +64,31 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("CameraVertical", this, &APlayerCharacter::RotateCameraVertical);
 	PlayerInputComponent->BindAxis("MoveCharacterForward", this, &APlayerCharacter::MoveCharacterForward);
 	PlayerInputComponent->BindAxis("MoveCharacterRight", this, &APlayerCharacter::MoveCharacterRight);
-	PlayerInputComponent->BindAction("FirstSlotSelected", IE_Pressed, this, &APlayerCharacter::FirstSlotSelected);
-	PlayerInputComponent->BindAction("SecondSlotSelected", IE_Pressed, this, &APlayerCharacter::SecondSlotSelected);
+	PlayerInputComponent->BindAction("FirstSlotSelected", IE_Pressed, this, &APlayerCharacter::RequestFirstSlotSelected);
+	PlayerInputComponent->BindAction("SecondSlotSelected", IE_Pressed, this, &APlayerCharacter::RequestSecondSlotSelected);
+}
+
+void APlayerCharacter::OnRep_SelectedWeapon()
+{
+	switch (SelectedWeapon)
+	{
+	case 0:
+	{
+		FirstSlotSelected();
+	}
+	break;
+		
+	case 1:
+	{
+		SecondSlotSelected();
+	}
+	break;
+
+	default:
+	{
+		check(false);
+	}
+	}
 }
 
 void APlayerCharacter::PickUp()
@@ -154,6 +182,11 @@ void APlayerCharacter::MoveCharacterRight(float Axis)
 	GetCharacterMovement()->AddInputVector(Direction);
 }
 
+void APlayerCharacter::Server_SendRotation_Implementation(double Yaw, double Pitch)
+{
+	SetActorRotation(FRotator(0,Yaw,0));
+}
+
 void APlayerCharacter::FirstSlotSelected()
 {
 	Pistol->SetHiddenInGame(true, true);
@@ -168,5 +201,27 @@ void APlayerCharacter::SecondSlotSelected()
 	Pistol->SetHiddenInGame(false, true);
 	
 	OnWeaponSelected.ExecuteIfBound(1);
+}
+
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, SelectedWeapon);
+}
+
+void APlayerCharacter::Server_RequestWeaponChange_Implementation(uint8 WeaponIndex)
+{
+	if (WeaponIndex > 1)
+	{
+		return;
+	}
+
+	SelectedWeapon = WeaponIndex;
+
+	if (IsLocallyControlled())
+	{
+		OnRep_SelectedWeapon();
+	}
 }
 

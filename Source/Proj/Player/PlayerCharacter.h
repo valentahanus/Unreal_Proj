@@ -69,6 +69,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Pistol;
+
+protected: // Replication
+
+	UPROPERTY(Replicated, ReplicatedUsing=OnRep_SelectedWeapon)
+	uint8 SelectedWeapon;
+
+	UFUNCTION()
+	void OnRep_SelectedWeapon();
 	
 protected: // VFX
 
@@ -80,6 +88,9 @@ private: // Picking Up
 	void PickUp();
 
 	void Drop();
+
+	void RequestFirstSlotSelected() { Server_RequestWeaponChange(0); }
+	void RequestSecondSlotSelected() { Server_RequestWeaponChange(1); }
 
 	void FirstSlotSelected();
 	void SecondSlotSelected();
@@ -100,4 +111,16 @@ private: // Movement
 
 	// Moves character left or right
 	void MoveCharacterRight(float Axis);
+
+public: // Networking
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+private: // Client -> Server
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SendRotation(double Yaw, double Pitch);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestWeaponChange(uint8 WeaponIndex);
 };
