@@ -9,6 +9,14 @@
 #include "Net/UnrealNetwork.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
+#include "DrawDebugHelpers.h"
+#include "GameFramework/HUD.h"
+
+bool bDebugEquip = false;
+FAutoConsoleVariableRef CVar_DebugEquip(TEXT("Proj.DebugEquip"), bDebugEquip,TEXT("Debug equipment console helper"), ECVF_Cheat);
+
+//static TAutoConsoleVariable<bool> CVar_DebugEquip(TEXT("Proj.DebugEquip"), false,TEXT("Debug equipment console helper"), ECVF_Cheat);
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -48,6 +56,35 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Server_SendRotation(GetActorRotation().Yaw, GetActorRotation().Pitch);
+
+	if (CVar_DebugEquip->GetBool())
+	{
+		if (!IsLocallyControlled())
+        {
+			// TODO nullcheck if player controler returns null if null return
+			// TODO finish add debug text (look inside DrawDebugString sting)
+			Cast<APlayerController>(GetController())->GetHUD()->AddDebugText(
+				Text,
+				BaseAct,
+				Duration,
+				TextLocation,
+				TextLocation,
+				TextColor,
+				/*bSkipOverwriteCheck=*/ true,
+				/*bAbsoluteLocation=*/ (TestBaseActor==nullptr),
+				/*bKeepAttachedToActor=*/ false,
+				nullptr,
+				FontScale,
+				bDrawShadow
+			);
+        	//DrawDebugString(GetWorld(), GetActorLocation(), "test", nullptr, FColor::Cyan, -1, true, 5);
+        }
+        else
+        {
+        	GEngine->AddOnScreenDebugMessage(reinterpret_cast<uint64>(this), -1, FColor::Cyan,"test2");
+        }
+	}
+	
 }
 
 // Called to bind functionality to input
@@ -223,5 +260,10 @@ void APlayerCharacter::Server_RequestWeaponChange_Implementation(uint8 WeaponInd
 	{
 		OnRep_SelectedWeapon();
 	}
+}
+
+void APlayerCharacter::SelectWeapon(uint8 WeaponIndex)
+{
+	Server_RequestWeaponChange(WeaponIndex);
 }
 

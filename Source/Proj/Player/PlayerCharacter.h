@@ -123,4 +123,9 @@ private: // Client -> Server
 
 	UFUNCTION(Server, Reliable)
 	void Server_RequestWeaponChange(uint8 WeaponIndex);
+
+private: // Cheats
+
+	UFUNCTION(Exec)
+	void SelectWeapon(uint8 WeaponIndex);
 };
