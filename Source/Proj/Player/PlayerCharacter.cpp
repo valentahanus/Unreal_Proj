@@ -61,23 +61,28 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{
 		if (!IsLocallyControlled())
         {
-			// TODO nullcheck if player controler returns null if null return
+			ENSURE_NOTNULL(GetController());
+			ENSURE_NOTNULL(Cast<APlayerController>(GetController()));
+			ENSURE_NOTNULL(Cast<APlayerController>(GetController())->GetHUD());
+
+			// TODO put ensure macros everywhere
+			
 			// TODO finish add debug text (look inside DrawDebugString sting)
 			Cast<APlayerController>(GetController())->GetHUD()->AddDebugText(
-				Text,
-				BaseAct,
-				Duration,
-				TextLocation,
-				TextLocation,
-				TextColor,
+				TEXT("test3"),
+				0,
+				-1,
+				GetActorLocation(),
+				GetActorLocation(),
+				FColor::Cyan,
 				/*bSkipOverwriteCheck=*/ true,
-				/*bAbsoluteLocation=*/ (TestBaseActor==nullptr),
+				/*bAbsoluteLocation=*/ false,
 				/*bKeepAttachedToActor=*/ false,
 				nullptr,
-				FontScale,
-				bDrawShadow
+				1,
+				false
 			);
-        	//DrawDebugString(GetWorld(), GetActorLocation(), "test", nullptr, FColor::Cyan, -1, true, 5);
+        	DrawDebugString(GetWorld(), GetActorLocation(), "test", nullptr, FColor::Cyan, -1, true, 5);
         }
         else
         {
