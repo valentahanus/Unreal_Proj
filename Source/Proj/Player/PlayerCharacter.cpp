@@ -10,7 +10,9 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 #include "DrawDebugHelpers.h"
+#include "ProjHUD.h"
 #include "GameFramework/HUD.h"
+#include "Kismet/GameplayStatics.h"
 
 bool bDebugEquip = false;
 FAutoConsoleVariableRef CVar_DebugEquip(TEXT("Proj.DebugEquip"), bDebugEquip,TEXT("Debug equipment console helper"), ECVF_Cheat);
@@ -47,7 +49,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnWeaponSelected.ExecuteIfBound(0);
+	Client_ForceSelectedWeapon(0);
 }
 
 // Called every frame
@@ -57,36 +59,43 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	Server_SendRotation(GetActorRotation().Yaw, GetActorRotation().Pitch);
 
-	if (CVar_DebugEquip->GetBool())
+	if (CVar_DebugEquip->GetBool() && GetNetMode() != ENetMode::NM_DedicatedServer)
 	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		ENSURE_NOTNULL(PC);
+		ENSURE_NOTNULL(PC->GetHUD());
+
+		FString Text;
+		
+		Text += FString::Printf(TEXT("Name: %s\nWeapon Selected: %i\nLocalNetRole: %s\nRemoteNetRole: %s\nNetMode: %s"),
+			*GetName(),
+			StaticCast<int32>(SelectedWeapon),
+			*NetRoleToString(GetLocalRole()),
+			*NetRoleToString(GetRemoteRole()),
+			*NetModeToString(GetNetMode())
+		);
+		
 		if (!IsLocallyControlled())
         {
-			ENSURE_NOTNULL(GetController());
-			ENSURE_NOTNULL(Cast<APlayerController>(GetController()));
-			ENSURE_NOTNULL(Cast<APlayerController>(GetController())->GetHUD());
-
-			// TODO put ensure macros everywhere
-			
-			// TODO finish add debug text (look inside DrawDebugString sting)
-			Cast<APlayerController>(GetController())->GetHUD()->AddDebugText(
-				TEXT("test3"),
-				0,
+			PC->GetHUD()->AddDebugText(
+				Text,
+				this,
 				-1,
 				GetActorLocation(),
 				GetActorLocation(),
 				FColor::Cyan,
-				/*bSkipOverwriteCheck=*/ true,
-				/*bAbsoluteLocation=*/ false,
-				/*bKeepAttachedToActor=*/ false,
+				false,
+				true,
+				false,
 				nullptr,
 				1,
-				false
+				true
 			);
-        	DrawDebugString(GetWorld(), GetActorLocation(), "test", nullptr, FColor::Cyan, -1, true, 5);
         }
         else
         {
-        	GEngine->AddOnScreenDebugMessage(reinterpret_cast<uint64>(this), -1, FColor::Cyan,"test2");
+        	ENSURE_NOTNULL(Cast<AProjHUD>(PC->GetHUD()));
+        	Cast<AProjHUD>(PC->GetHUD())->AddDebugString(Text);
         }
 	}
 	
@@ -138,7 +147,9 @@ void APlayerCharacter::PickUp()
 	FCollisionQueryParams QueryParams = FCollisionQueryParams();
 	QueryParams.bReturnPhysicalMaterial = false;
 	QueryParams.bIgnoreTouches = true;
-	// TODO Add ignore tags here 
+	
+	// TODO Add ignore tags here
+	
 	QueryParams.AddIgnoredActor(this);
 	
 	FHitResult TraceResult;
@@ -265,6 +276,13 @@ void APlayerCharacter::Server_RequestWeaponChange_Implementation(uint8 WeaponInd
 	{
 		OnRep_SelectedWeapon();
 	}
+}
+
+void APlayerCharacter::Client_ForceSelectedWeapon_Implementation(uint8 WeaponIndex)
+{
+	SelectedWeapon = WeaponIndex;
+
+	OnRep_SelectedWeapon();
 }
 
 void APlayerCharacter::SelectWeapon(uint8 WeaponIndex)

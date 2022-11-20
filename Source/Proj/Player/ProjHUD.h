@@ -18,5 +18,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnWeaponSelected(uint8 WeaponIndex);
+
+	virtual void DrawHUD() override;
+
+	void AddDebugString(FString DebugString);
+
+private:
+
+	TArray<FString> DebugTestQueue;
 	
 };
