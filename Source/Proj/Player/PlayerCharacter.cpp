@@ -72,7 +72,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			StaticCast<int32>(SelectedWeapon),
 			*NetRoleToString(GetLocalRole()),
 			*NetRoleToString(GetRemoteRole()),
-			*NetModeToString(GetNetMode())
+			*MyNetModeToString(GetNetMode())
 		);
 		
 		if (!IsLocallyControlled())

@@ -5,7 +5,7 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Proj, "Proj" );
 
-FString NetModeToString(ENetMode Mode)
+FString MyNetModeToString(ENetMode Mode)
 {
 	switch (Mode)
 	{

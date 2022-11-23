@@ -19,6 +19,6 @@ if (x == nullptr) \
 	return; \
 }
 
-FString NetModeToString(ENetMode Mode);
+FString MyNetModeToString(ENetMode Mode);
 
 FString NetRoleToString(ENetRole Role);
