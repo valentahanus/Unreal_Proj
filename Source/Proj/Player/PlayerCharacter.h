@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class UPhysicsConstraintComponent;
+class UPlayerReplicationComponent;
 
 DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, uint8);
 
@@ -51,9 +52,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 CharacterRotationSpeed;
+
+public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UCameraComponent* Camera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPlayerReplicationComponent* PlayerReplicationComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UPhysicsConstraintComponent* PhysicsConstraint;
@@ -117,9 +123,6 @@ public: // Networking
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private: // Client -> Server
-
-	UFUNCTION(Server, Unreliable)
-	void Server_SendRotation(double Yaw, double Pitch);
 
 	UFUNCTION(Server, Reliable)
 	void Server_RequestWeaponChange(uint8 WeaponIndex);

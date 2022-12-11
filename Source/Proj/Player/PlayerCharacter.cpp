@@ -10,6 +10,8 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 #include "DrawDebugHelpers.h"
+#include "PlayerComponent.h"
+#include "PlayerReplicationComponent.h"
 #include "ProjHUD.h"
 #include "GameFramework/HUD.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,6 +26,8 @@ APlayerCharacter::APlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	PlayerReplicationComponent = CreateDefaultSubobject<UPlayerReplicationComponent>(TEXT("PlayerReplicationComponent"));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	Camera->SetupAttachment(GetRootComponent());
@@ -48,7 +52,14 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	TArray<UActorComponent*> Components = GetComponentsByClass(UPlayerComponent::StaticClass());
 
+	for (UActorComponent* Component : Components)
+	{
+		Cast<UPlayerComponent>(Component)->SetupPlayerComponent(this);
+	}
+	
 	Client_ForceSelectedWeapon(0);
 }
 
@@ -56,8 +67,6 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	Server_SendRotation(GetActorRotation().Yaw, GetActorRotation().Pitch);
 
 	if (CVar_DebugEquip->GetBool() && GetNetMode() != ENetMode::NM_DedicatedServer)
 	{
@@ -233,11 +242,6 @@ void APlayerCharacter::MoveCharacterRight(float Axis)
 	FVector Direction = FVector::CrossProduct(FVector(0, 0, 1), Camera->GetComponentTransform().GetRotation().GetForwardVector());
 	Direction *= Axis * PlayerSpeed * GetWorld()->GetDeltaSeconds();
 	GetCharacterMovement()->AddInputVector(Direction);
-}
-
-void APlayerCharacter::Server_SendRotation_Implementation(double Yaw, double Pitch)
-{
-	SetActorRotation(FRotator(0,Yaw,0));
 }
 
 void APlayerCharacter::FirstSlotSelected()
