@@ -6,21 +6,15 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UWeaponComponent;
 class UCameraComponent;
 class UPhysicsConstraintComponent;
 class UPlayerReplicationComponent;
-
-DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, uint8);
 
 UCLASS()
 class PROJ_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-public:
-
-	//
-	FOnWeaponSelectedDelegate OnWeaponSelected;
 
 public:
 	
@@ -62,6 +56,9 @@ public:
 	UPlayerReplicationComponent* PlayerReplicationComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UWeaponComponent* WeaponComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UPhysicsConstraintComponent* PhysicsConstraint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -76,30 +73,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Pistol;
 
-protected: // Replication
-
-	UPROPERTY(Replicated, ReplicatedUsing=OnRep_SelectedWeapon)
-	uint8 SelectedWeapon;
-
-	UFUNCTION()
-	void OnRep_SelectedWeapon();
+public: // Picking up
 	
-protected: // VFX
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayPickUpVFX();
-	
-private: // Picking Up
-
 	void PickUp();
 
 	void Drop();
-
-	void RequestFirstSlotSelected() { Server_RequestWeaponChange(0); }
-	void RequestSecondSlotSelected() { Server_RequestWeaponChange(1); }
-
-	void FirstSlotSelected();
-	void SecondSlotSelected();
 
 private: // Movement
 
@@ -117,23 +95,4 @@ private: // Movement
 
 	// Moves character left or right
 	void MoveCharacterRight(float Axis);
-
-public: // Networking
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-private: // Client -> Server
-
-	UFUNCTION(Server, Reliable)
-	void Server_RequestWeaponChange(uint8 WeaponIndex);
-
-private: // Server -> Client
-
-	UFUNCTION(Client, Reliable)
-	void Client_ForceSelectedWeapon(uint8 WeaponIndex);
-
-private: // Cheats
-
-	UFUNCTION(Exec)
-	void SelectWeapon(uint8 WeaponIndex);
 };

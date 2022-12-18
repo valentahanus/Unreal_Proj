@@ -5,8 +5,7 @@
 
 #include "PlayerCharacter.h"
 #include "ProjHUD.h"
-#include "GameFramework/GameMode.h"
-#include "Kismet/GameplayStatics.h"
+#include "WeaponComponent.h"
 
 
 void AProjPlayerController::BeginPlay()
@@ -16,7 +15,8 @@ void AProjPlayerController::BeginPlay()
 	if (GetPawn() && GetPawn()->IsA<APlayerCharacter>())
 	{
 		APlayerCharacter* MyPlayer = Cast<APlayerCharacter>(GetPawn());
-		MyPlayer->OnWeaponSelected.BindUObject(this, &AProjPlayerController::OnPlayerWeaponSelected);
+
+		MyPlayer->WeaponComponent->OnWeaponSelected.BindUObject(this, &AProjPlayerController::OnPlayerWeaponSelected);
 	}
 }
 

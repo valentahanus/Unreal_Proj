@@ -13,6 +13,7 @@
 #include "PlayerComponent.h"
 #include "PlayerReplicationComponent.h"
 #include "ProjHUD.h"
+#include "WeaponComponent.h"
 #include "GameFramework/HUD.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -28,6 +29,8 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PlayerReplicationComponent = CreateDefaultSubobject<UPlayerReplicationComponent>(TEXT("PlayerReplicationComponent"));
+
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	Camera->SetupAttachment(GetRootComponent());
@@ -59,8 +62,6 @@ void APlayerCharacter::BeginPlay()
 	{
 		Cast<UPlayerComponent>(Component)->SetupPlayerComponent(this);
 	}
-	
-	Client_ForceSelectedWeapon(0);
 }
 
 // Called every frame
@@ -78,7 +79,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 		
 		Text += FString::Printf(TEXT("Name: %s\nWeapon Selected: %i\nLocalNetRole: %s\nRemoteNetRole: %s\nNetMode: %s"),
 			*GetName(),
-			StaticCast<int32>(SelectedWeapon),
 			*NetRoleToString(GetLocalRole()),
 			*NetRoleToString(GetRemoteRole()),
 			*MyNetModeToString(GetNetMode())
@@ -124,31 +124,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("CameraVertical", this, &APlayerCharacter::RotateCameraVertical);
 	PlayerInputComponent->BindAxis("MoveCharacterForward", this, &APlayerCharacter::MoveCharacterForward);
 	PlayerInputComponent->BindAxis("MoveCharacterRight", this, &APlayerCharacter::MoveCharacterRight);
-	PlayerInputComponent->BindAction("FirstSlotSelected", IE_Pressed, this, &APlayerCharacter::RequestFirstSlotSelected);
-	PlayerInputComponent->BindAction("SecondSlotSelected", IE_Pressed, this, &APlayerCharacter::RequestSecondSlotSelected);
-}
-
-void APlayerCharacter::OnRep_SelectedWeapon()
-{
-	switch (SelectedWeapon)
-	{
-	case 0:
-	{
-		FirstSlotSelected();
-	}
-	break;
-		
-	case 1:
-	{
-		SecondSlotSelected();
-	}
-	break;
-
-	default:
-	{
-		check(false);
-	}
-	}
+	PlayerInputComponent->BindAction("FirstSlotSelected", IE_Pressed, WeaponComponent, &UWeaponComponent::RequestFirstSlotSelected);
+	PlayerInputComponent->BindAction("SecondSlotSelected", IE_Pressed, WeaponComponent, &UWeaponComponent::RequestSecondSlotSelected);
 }
 
 void APlayerCharacter::PickUp()
@@ -187,8 +164,6 @@ void APlayerCharacter::PickUp()
 		Cast<UPrimitiveComponent>(ConstraintDummy),
 		FName()
 	);
-
-	PlayPickUpVFX();
 }
 
 void APlayerCharacter::Drop()
@@ -242,55 +217,5 @@ void APlayerCharacter::MoveCharacterRight(float Axis)
 	FVector Direction = FVector::CrossProduct(FVector(0, 0, 1), Camera->GetComponentTransform().GetRotation().GetForwardVector());
 	Direction *= Axis * PlayerSpeed * GetWorld()->GetDeltaSeconds();
 	GetCharacterMovement()->AddInputVector(Direction);
-}
-
-void APlayerCharacter::FirstSlotSelected()
-{
-	Pistol->SetHiddenInGame(true, true);
-	PhysGun->SetHiddenInGame(false, true);
-	
-	OnWeaponSelected.ExecuteIfBound(0);
-}
-
-void APlayerCharacter::SecondSlotSelected()
-{
-	PhysGun->SetHiddenInGame(true, true);
-	Pistol->SetHiddenInGame(false, true);
-	
-	OnWeaponSelected.ExecuteIfBound(1);
-}
-
-void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(APlayerCharacter, SelectedWeapon);
-}
-
-void APlayerCharacter::Server_RequestWeaponChange_Implementation(uint8 WeaponIndex)
-{
-	if (WeaponIndex > 1)
-	{
-		return;
-	}
-
-	SelectedWeapon = WeaponIndex;
-
-	if (IsLocallyControlled())
-	{
-		OnRep_SelectedWeapon();
-	}
-}
-
-void APlayerCharacter::Client_ForceSelectedWeapon_Implementation(uint8 WeaponIndex)
-{
-	SelectedWeapon = WeaponIndex;
-
-	OnRep_SelectedWeapon();
-}
-
-void APlayerCharacter::SelectWeapon(uint8 WeaponIndex)
-{
-	Server_RequestWeaponChange(WeaponIndex);
 }
 
