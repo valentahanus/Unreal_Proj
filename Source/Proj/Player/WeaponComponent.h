@@ -45,7 +45,7 @@ protected: // VFX
 public: // Switching
 
 	void RequestFirstSlotSelected() { Server_RequestWeaponChange(0); }
-2	void RequestSecondSlotSelected() { Server_RequestWeaponChange(1); }
+	void RequestSecondSlotSelected() { Server_RequestWeaponChange(1); }
 
 private: // Switching
 
