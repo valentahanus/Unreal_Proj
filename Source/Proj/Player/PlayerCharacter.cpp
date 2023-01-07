@@ -79,6 +79,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		
 		Text += FString::Printf(TEXT("Name: %s\nWeapon Selected: %i\nLocalNetRole: %s\nRemoteNetRole: %s\nNetMode: %s"),
 			*GetName(),
+			WeaponComponent->GetSelectedWeapon(),
 			*NetRoleToString(GetLocalRole()),
 			*NetRoleToString(GetRemoteRole()),
 			*MyNetModeToString(GetNetMode())

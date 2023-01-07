@@ -37,6 +37,10 @@ protected: // Replication
 	UFUNCTION()
 	void OnRep_SelectedWeapon();
 
+public: // Weapons
+
+	uint8 GetSelectedWeapon();
+
 protected: // VFX
 
 	UFUNCTION(BlueprintImplementableEvent)

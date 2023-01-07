@@ -17,6 +17,8 @@ UWeaponComponent::UWeaponComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	SetIsReplicatedByDefault(true);
+
 	// ...
 }
 
@@ -60,6 +62,11 @@ void UWeaponComponent::OnRep_SelectedWeapon()
 			check(false);
 		}
 	}
+}
+
+uint8 UWeaponComponent::GetSelectedWeapon()
+{
+	return SelectedWeapon;
 }
 
 void UWeaponComponent::FirstSlotSelected()
