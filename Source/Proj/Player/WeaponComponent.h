@@ -6,6 +6,7 @@
 #include "PlayerComponent.h"
 #include "WeaponComponent.generated.h"
 
+class APhysGun;
 DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, uint8);
 class UCameraComponent;
 
@@ -70,4 +71,17 @@ private: // Cheats
 
 	UFUNCTION(Exec)
 	void SelectWeapon(uint8 WeaponIndex);
+
+public: // Actions
+
+	void Fire();
+
+private: // Guns
+
+	UPROPERTY()
+	APhysGun* PhysGun;
+
+public:
+
+	void SetGun(APhysGun* InGun);
 };

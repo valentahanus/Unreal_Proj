@@ -10,17 +10,13 @@ UCLASS()
 class PROJ_API AGunBase : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AGunBase();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+public:
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void Fire();
 
+protected: // VFX
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnFired();
 };

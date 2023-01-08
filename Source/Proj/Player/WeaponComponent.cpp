@@ -113,6 +113,16 @@ void UWeaponComponent::SelectWeapon(uint8 WeaponIndex)
 	Server_RequestWeaponChange(WeaponIndex);
 }
 
+void UWeaponComponent::Fire()
+{
+	
+}
+
+void UWeaponComponent::SetGun(APhysGun* InGun)
+{
+	PhysGun = InGun;
+}
+
 void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

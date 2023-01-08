@@ -16,6 +16,7 @@
 #include "WeaponComponent.h"
 #include "GameFramework/HUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "Objects/PhysGun.h"
 
 bool bDebugEquip = false;
 FAutoConsoleVariableRef CVar_DebugEquip(TEXT("Proj.DebugEquip"), bDebugEquip,TEXT("Debug equipment console helper"), ECVF_Cheat);
@@ -62,6 +63,8 @@ void APlayerCharacter::BeginPlay()
 	{
 		Cast<UPlayerComponent>(Component)->SetupPlayerComponent(this);
 	}
+
+	WeaponComponent->SetGun(Cast<APhysGun>(PhysGun->GetChildActor()));
 }
 
 // Called every frame
@@ -118,7 +121,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// Unreal input called functions
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::Jump);
-	PlayerInputComponent->BindAction("PickUp", EInputEvent::IE_Pressed, this, &APlayerCharacter::PickUp);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &APlayerCharacter::Fire);
 	PlayerInputComponent->BindAction("Drop", EInputEvent::IE_Pressed, this, &APlayerCharacter::Drop);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &APlayerCharacter::Run);
 	PlayerInputComponent->BindAxis("CameraHorizontal", this, &APlayerCharacter::RotateCharacterHorizontal);
@@ -129,9 +132,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("SecondSlotSelected", IE_Pressed, WeaponComponent, &UWeaponComponent::RequestSecondSlotSelected);
 }
 
-void APlayerCharacter::PickUp()
+void APlayerCharacter::Fire()
 {
-	FCollisionQueryParams QueryParams = FCollisionQueryParams();
+	/*FCollisionQueryParams QueryParams = FCollisionQueryParams();
 	QueryParams.bReturnPhysicalMaterial = false;
 	QueryParams.bIgnoreTouches = true;
 	
@@ -164,7 +167,7 @@ void APlayerCharacter::PickUp()
 		FName(),
 		Cast<UPrimitiveComponent>(ConstraintDummy),
 		FName()
-	);
+	);*/
 }
 
 void APlayerCharacter::Drop()

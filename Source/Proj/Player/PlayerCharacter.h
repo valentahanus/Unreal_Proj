@@ -75,7 +75,7 @@ public:
 
 public: // Picking up
 	
-	void PickUp();
+	void Fire();
 
 	void Drop();
 
