@@ -168,6 +168,8 @@ void APlayerCharacter::Fire()
 		Cast<UPrimitiveComponent>(ConstraintDummy),
 		FName()
 	);*/
+
+	WeaponComponent->Fire();
 }
 
 void APlayerCharacter::Drop()

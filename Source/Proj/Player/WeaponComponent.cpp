@@ -4,6 +4,8 @@
 
 #include "Player/WeaponComponent.h"
 
+#include <Objects/PhysGun.h>
+
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -115,7 +117,16 @@ void UWeaponComponent::SelectWeapon(uint8 WeaponIndex)
 
 void UWeaponComponent::Fire()
 {
-	
+	switch (SelectedWeapon)
+	{
+	case 0:
+		PhysGun->Fire();
+		break;
+		
+	default:
+		ENSURE_NO_ENTRY;
+		break;
+	}
 }
 
 void UWeaponComponent::SetGun(APhysGun* InGun)

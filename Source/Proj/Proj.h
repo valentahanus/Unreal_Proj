@@ -6,16 +6,28 @@
 
 inline constexpr ECollisionChannel PickUpChannel = ECollisionChannel::ECC_GameTraceChannel2;
 
+#define LOG(text, ...) UE_LOG(LogTemp, Warning, TEXT(text), __VA_ARGS__)
+
+#define ENSURE_IMPL \
+static bool bTriggered = false; \
+if (bTriggered == false) \
+{ \
+    UE_DEBUG_BREAK(); \
+    bTriggered = true; \
+} \
+
 #define ENSURE_NOTNULL(x) \
 if (x == nullptr) \
 { \
-	static bool bTriggered = false; \
-	if (bTriggered == false) \
-	{ \
-		UE_DEBUG_BREAK(); \
-		bTriggered = true; \
-	} \
+	ENSURE_IMPL \
 	UE_LOG(LogTemp, Error, TEXT("%s is nullptr ,file:(%s), funcion:(%s)"), TEXT(#x), *FString(__FILE__), *FString(__FUNCTION__)) \
+	return; \
+}
+
+#define ENSURE_NO_ENTRY \
+{ \
+	ENSURE_IMPL \
+	UE_LOG(LogTemp, Error, TEXT("ENSURE IS ANGY,file:(%s), funcion:(%s)"), *FString(__FILE__), *FString(__FUNCTION__)) \
 	return; \
 }
 
