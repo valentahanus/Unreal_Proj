@@ -6,9 +6,18 @@
 #include "PlayerComponent.h"
 #include "WeaponComponent.generated.h"
 
-class APhysGun;
-DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, uint8);
+UENUM(BlueprintType)
+enum class EWeapon : uint8
+{
+    None = 0,
+    Pistol,
+    PhysGun
+};
+
+DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, EWeapon);
+
 class UCameraComponent;
+class APhysGun;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJ_API UWeaponComponent : public UPlayerComponent
@@ -33,14 +42,14 @@ public:
 protected: // Replication
 
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_SelectedWeapon)
-	uint8 SelectedWeapon;
+	EWeapon SelectedWeapon;
 
 	UFUNCTION()
 	void OnRep_SelectedWeapon();
 
 public: // Weapons
 
-	uint8 GetSelectedWeapon();
+	EWeapon GetSelectedWeapon();
 
 protected: // VFX
 

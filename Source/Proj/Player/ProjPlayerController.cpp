@@ -20,7 +20,7 @@ void AProjPlayerController::BeginPlay()
 	}
 }
 
-void AProjPlayerController::OnPlayerWeaponSelected(uint8 WeaponIndex)
+void AProjPlayerController::OnPlayerWeaponSelected(EWeapon WeaponIndex)
 {
 	if (GetHUD() && GetHUD()->IsA<AProjHUD>())
 	{

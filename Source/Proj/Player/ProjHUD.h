@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "ProjHUD.generated.h"
 
+enum class EWeapon : uint8;
+
 /**
  * 
  */
@@ -17,7 +19,7 @@ class PROJ_API AProjHUD : public AHUD
 public:
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnWeaponSelected(uint8 WeaponIndex);
+	void OnWeaponSelected(EWeapon WeaponIndex);
 
 	virtual void DrawHUD() override;
 

@@ -31,7 +31,7 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 	Super::SetupPlayerComponent(InOwningCharacter);
 
 	// ...
-	Client_ForceSelectedWeapon(0);
+	Client_ForceSelectedWeapon(static_cast<uint8>(EWeapon::None));
 }
 
 
@@ -47,13 +47,19 @@ void UWeaponComponent::OnRep_SelectedWeapon()
 {
 	switch (SelectedWeapon)
 	{
-	case 0:
+	case EWeapon::None:
+		{
+			
+		}
+		break;
+		
+	case EWeapon::Pistol:
 		{
 			FirstSlotSelected();
 		}
 		break;
 		
-	case 1:
+	case EWeapon::PhysGun:
 		{
 			SecondSlotSelected();
 		}
@@ -66,7 +72,7 @@ void UWeaponComponent::OnRep_SelectedWeapon()
 	}
 }
 
-uint8 UWeaponComponent::GetSelectedWeapon()
+EWeapon UWeaponComponent::GetSelectedWeapon()
 {
 	return SelectedWeapon;
 }
@@ -77,7 +83,7 @@ void UWeaponComponent::FirstSlotSelected()
 	OwningCharacter->Pistol->SetHiddenInGame(true, true);
 	OwningCharacter->PhysGun->SetHiddenInGame(false, true);
 	
-	OnWeaponSelected.ExecuteIfBound(0);
+	OnWeaponSelected.ExecuteIfBound(EWeapon::Pistol);
 }
 
 void UWeaponComponent::SecondSlotSelected()
@@ -85,17 +91,12 @@ void UWeaponComponent::SecondSlotSelected()
 	OwningCharacter->PhysGun->SetHiddenInGame(true, true);
 	OwningCharacter->Pistol->SetHiddenInGame(false, true);
 	
-	OnWeaponSelected.ExecuteIfBound(1);
+	OnWeaponSelected.ExecuteIfBound(EWeapon::PhysGun);
 }
 
 void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponIndex)
 {
-	if (WeaponIndex > 1)
-	{
-		return;
-	}
-
-	SelectedWeapon = WeaponIndex;
+	SelectedWeapon = static_cast<EWeapon>(WeaponIndex);
 
 	if (OwningCharacter->IsLocallyControlled())
 	{
@@ -105,7 +106,7 @@ void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponInd
 
 void UWeaponComponent::Client_ForceSelectedWeapon_Implementation(uint8 WeaponIndex)
 {
-	SelectedWeapon = WeaponIndex;
+	SelectedWeapon = static_cast<EWeapon>(WeaponIndex);
 
 	OnRep_SelectedWeapon();
 }
@@ -119,7 +120,7 @@ void UWeaponComponent::Fire()
 {
 	switch (SelectedWeapon)
 	{
-	case 0:
+	case EWeapon::PhysGun:
 		PhysGun->Fire();
 		break;
 		

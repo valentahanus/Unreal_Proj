@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "ProjPlayerController.generated.h"
 
+enum class EWeapon : uint8;
+
 /**
  * 
  */
@@ -16,5 +18,5 @@ class PROJ_API AProjPlayerController : public APlayerController
 
 	virtual void BeginPlay() override;
 
-	void OnPlayerWeaponSelected(uint8 WeaponIndex);
+	void OnPlayerWeaponSelected(EWeapon WeaponIndex);
 };
