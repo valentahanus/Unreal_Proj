@@ -134,41 +134,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::Fire()
 {
-	/*FCollisionQueryParams QueryParams = FCollisionQueryParams();
-	QueryParams.bReturnPhysicalMaterial = false;
-	QueryParams.bIgnoreTouches = true;
-	
-	// TODO Add ignore tags here
-	
-	QueryParams.AddIgnoredActor(this);
-	
-	FHitResult TraceResult;
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	FVector CameraLocation = Camera->GetComponentLocation();
-
-	double PickupRange = 200;
-
-	FVector CameraDirection = CameraRotation.RotateVector(FVector(1, 0, 0));
-	FVector TraceOffset = CameraDirection * PickupRange;
-	FVector TraceLocation = CameraLocation + TraceOffset;
-	
-	bool ValidHit = GetWorld()->LineTraceSingleByChannel(TraceResult, CameraLocation, TraceLocation, PickUpChannel, QueryParams);
-
-	// Action called if it hits something
-	if (!TraceResult.GetActor())
-	{
-		return;
-	}
-
-	//TraceResult.GetActor()->SetActorLocation(TraceLocation);
-	
-	PhysicsConstraint->SetConstrainedComponents(
-		Cast<UPrimitiveComponent>(TraceResult.GetActor()->GetRootComponent()),
-		FName(),
-		Cast<UPrimitiveComponent>(ConstraintDummy),
-		FName()
-	);*/
-
 	WeaponComponent->Fire();
 }
 

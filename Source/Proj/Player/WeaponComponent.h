@@ -58,8 +58,8 @@ protected: // VFX
 
 public: // Switching
 
-	void RequestFirstSlotSelected() { Server_RequestWeaponChange(0); }
-	void RequestSecondSlotSelected() { Server_RequestWeaponChange(1); }
+	void RequestFirstSlotSelected() { Server_RequestWeaponChange(static_cast<uint8>(EWeapon::Pistol)); }
+	void RequestSecondSlotSelected() { Server_RequestWeaponChange(static_cast<uint8>(EWeapon::PhysGun)); }
 
 private: // Switching
 

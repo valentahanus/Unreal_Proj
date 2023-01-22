@@ -80,16 +80,16 @@ EWeapon UWeaponComponent::GetSelectedWeapon()
 void UWeaponComponent::FirstSlotSelected()
 {
 
-	OwningCharacter->Pistol->SetHiddenInGame(true, true);
-	OwningCharacter->PhysGun->SetHiddenInGame(false, true);
+	OwningCharacter->Pistol->SetHiddenInGame(false, true);
+	OwningCharacter->PhysGun->SetHiddenInGame(true, true);
 	
 	OnWeaponSelected.ExecuteIfBound(EWeapon::Pistol);
 }
 
 void UWeaponComponent::SecondSlotSelected()
 {
-	OwningCharacter->PhysGun->SetHiddenInGame(true, true);
-	OwningCharacter->Pistol->SetHiddenInGame(false, true);
+	OwningCharacter->PhysGun->SetHiddenInGame(false, true);
+	OwningCharacter->Pistol->SetHiddenInGame(true, true);
 	
 	OnWeaponSelected.ExecuteIfBound(EWeapon::PhysGun);
 }
