@@ -2,7 +2,7 @@
 
 
 #include "PhysGun.h"
-
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Proj.h"
 
 

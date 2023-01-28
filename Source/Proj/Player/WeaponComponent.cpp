@@ -34,6 +34,13 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 	Client_ForceSelectedWeapon(static_cast<uint8>(EWeapon::None));
 }
 
+void UWeaponComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PhysGun->PhysicsConstraint = OwningCharacter->PhysicsConstraint;
+}
+
 
 // Called every frame
 void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

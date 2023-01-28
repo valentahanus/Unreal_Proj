@@ -6,6 +6,7 @@
 #include "GunBase.h"
 #include "PhysGun.generated.h"
 
+class UPhysicsConstraintComponent;
 UCLASS()
 class PROJ_API APhysGun : public AGunBase
 {
@@ -26,4 +27,9 @@ public:
 public:
 	// Fire override
 	virtual void Fire() override;
+
+public:
+
+	UPROPERTY()
+	UPhysicsConstraintComponent* PhysicsConstraint;
 };
