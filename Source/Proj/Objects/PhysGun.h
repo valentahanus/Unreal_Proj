@@ -30,6 +30,14 @@ public:
 
 public:
 
+	void SetPhysicsConstraint(UPhysicsConstraintComponent* InPhysicsConstraint) { PhysicsConstraint = InPhysicsConstraint; }
+	void SetConstraintDummy(UStaticMeshComponent* InConstraintDummy) { ConstraintDummy = InConstraintDummy; }
+
+protected:
+
 	UPROPERTY()
 	UPhysicsConstraintComponent* PhysicsConstraint;
+
+	UPROPERTY()
+	UStaticMeshComponent* ConstraintDummy;
 };

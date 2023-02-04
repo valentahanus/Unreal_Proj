@@ -25,8 +25,6 @@ class PROJ_API UWeaponComponent : public UPlayerComponent
 	GENERATED_BODY()
 
 public:
-
-	
 	
 	// Sets default values for this component's properties
 	UWeaponComponent();

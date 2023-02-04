@@ -59,12 +59,6 @@ public:
 	UWeaponComponent* WeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UPhysicsConstraintComponent* PhysicsConstraint;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UStaticMeshComponent* ConstraintDummy;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	USceneComponent* ItemAnchor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -72,6 +66,14 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UChildActorComponent* Pistol;
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UStaticMeshComponent* ConstraintDummy;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPhysicsConstraintComponent* PhysicsConstraint;
 
 public: // Picking up
 	
@@ -95,4 +97,9 @@ private: // Movement
 
 	// Moves character left or right
 	void MoveCharacterRight(float Axis);
+
+public: // Getters
+
+	UPhysicsConstraintComponent* GetPhysicsConstraint() { return PhysicsConstraint; }
+	UStaticMeshComponent* GetConstraintDummy() { return ConstraintDummy; }
 };

@@ -4,6 +4,7 @@
 #include "PhysGun.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Proj.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values
@@ -39,20 +40,31 @@ void APhysGun::Fire()
 	QueryParams.AddIgnoredActor(this);
 	
 	FHitResult TraceResult;
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	FVector CameraLocation = Camera->GetComponentLocation();
+	FRotator ShootRotation = GetActorRotation();
+	FVector ShootLocation = GetActorLocation();
 
 	double PickupRange = 200;
 
-	FVector CameraDirection = CameraRotation.RotateVector(FVector(1, 0, 0));
-	FVector TraceOffset = CameraDirection * PickupRange;
-	FVector TraceLocation = CameraLocation + TraceOffset;
+	FVector ShootDirection = ShootRotation.RotateVector(FVector(1, 0, 0));
+	FVector TraceOffset = ShootDirection * PickupRange;
+	FVector TraceLocation = ShootLocation + TraceOffset;
 	
-	bool ValidHit = GetWorld()->LineTraceSingleByChannel(TraceResult, CameraLocation, TraceLocation, PickUpChannel, QueryParams);
+	bool ValidHit = GetWorld()->LineTraceSingleByChannel(TraceResult, ShootLocation, TraceLocation, PickUpChannel, QueryParams);
 
 	// Action called if it hits something
 	if (!TraceResult.GetActor())
 	{
+		DrawDebugLine
+		(
+			this->GetWorld(),
+			ShootLocation,
+			TraceLocation,
+			FColor::Cyan,
+			true,
+			1,
+			2,
+			4
+		);
 		return;
 	}
 

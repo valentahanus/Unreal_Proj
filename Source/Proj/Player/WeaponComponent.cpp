@@ -37,8 +37,6 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	PhysGun->PhysicsConstraint = OwningCharacter->PhysicsConstraint;
 }
 
 
@@ -139,7 +137,12 @@ void UWeaponComponent::Fire()
 
 void UWeaponComponent::SetGun(APhysGun* InGun)
 {
+	ENSURE_NOTNULL(InGun);
+	
 	PhysGun = InGun;
+
+	PhysGun->SetPhysicsConstraint(OwningCharacter->GetPhysicsConstraint());
+	PhysGun->SetConstraintDummy(OwningCharacter->GetConstraintDummy());
 }
 
 void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
