@@ -45,7 +45,7 @@ void APhysGun::Fire()
 
 	double PickupRange = 200;
 
-	FVector ShootDirection = ShootRotation.RotateVector(FVector(1, 0, 0));
+	FVector ShootDirection = ShootRotation.RotateVector(FVector(-1, 0, 0));
 	FVector TraceOffset = ShootDirection * PickupRange;
 	FVector TraceLocation = ShootLocation + TraceOffset;
 	
