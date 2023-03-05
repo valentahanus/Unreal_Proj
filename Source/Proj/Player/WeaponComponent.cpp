@@ -21,6 +21,9 @@ UWeaponComponent::UWeaponComponent()
 
 	SetIsReplicatedByDefault(true);
 
+	WobblyGunBufferSize = 20;
+	WobblyGunInterpolationStrength = 0.5f;
+
 	// ...
 }
 
@@ -37,6 +40,9 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HeldGuns.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
+	VisibleGuns.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
 }
 
 
@@ -45,7 +51,14 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	FRotator CurrentRotation = OwningCharacter->PhysGun->GetComponentRotation();
+	
+	PhysGun->SetActorRotation(FMath::Lerp(LastGunRotation[index], PhysGun->GetActorRotation(), WobblyGunInterpolationStrength));
+	
+	LastGunRotation[index] = CurrentRotation;
+
+	index++;
+	index %= WobblyGunBufferSize;
 }
 
 void UWeaponComponent::OnRep_SelectedWeapon()
@@ -128,9 +141,15 @@ void UWeaponComponent::Fire()
 	case EWeapon::PhysGun:
 		PhysGun->Fire();
 		break;
+
+	case EWeapon::Pistol:
+		break;
+
+	case EWeapon::None:
+		break;
 		
 	default:
-		ENSURE_NO_ENTRY;
+		TEXT("Problem no weapon selected");
 		break;
 	}
 }
@@ -143,6 +162,8 @@ void UWeaponComponent::SetGun(APhysGun* InGun)
 
 	PhysGun->SetPhysicsConstraint(OwningCharacter->GetPhysicsConstraint());
 	PhysGun->SetConstraintDummy(OwningCharacter->GetConstraintDummy());
+	
+	LastGunRotation.Init(OwningCharacter->PhysGun->GetComponentRotation(), WobblyGunBufferSize);
 }
 
 void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

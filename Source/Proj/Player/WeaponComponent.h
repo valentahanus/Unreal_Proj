@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "PlayerComponent.h"
+#include "Proj.h"
 #include "WeaponComponent.generated.h"
 
+class AGunBase;
 UENUM(BlueprintType)
 enum class EWeapon : uint8
 {
@@ -91,9 +93,29 @@ public: // Actions
 private: // Guns
 
 	UPROPERTY()
-	APhysGun* PhysGun;
+	TArray<AGunBase*> HeldGuns;
+
+	UPROPERTY()
+	TArray<AGunBase*> VisibleGuns;
+
+	TArray<FRotator> LastGunRotation;
+
+	int32 index = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 WobblyGunBufferSize;
+
+	UPROPERTY(EditDefaultsOnly)
+	float WobblyGunInterpolationStrength;
 
 public:
 
 	void SetGun(APhysGun* InGun);
+
+	void SetHeldGun(EWeapon WeaponType, AGunBase* Weapon)
+	{
+		// problem ensure that weapontype is not zero
+		
+		HeldGuns[static_cast<int32>(WeaponType) - 1] = Weapon;
+	}
 };
