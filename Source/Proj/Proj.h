@@ -16,12 +16,20 @@ if (bTriggered == false) \
     bTriggered = true; \
 } \
 
-#define ENSURE_NOTNULL(x) \
-if (x == nullptr) \
+#define ENSURE_NOTNULL(x, ...) \
+if ((x) == nullptr) \
 { \
 	ENSURE_IMPL \
 	UE_LOG(LogTemp, Error, TEXT("%s is nullptr ,file:(%s), funcion:(%s)"), TEXT(#x), *FString(__FILE__), *FString(__FUNCTION__)) \
-	return; \
+	return __VA_ARGS__; \
+}
+
+#define ENSURE_TRUE(x, ...) \
+if ((x) == false) \
+{ \
+	ENSURE_IMPL \
+	UE_LOG(LogTemp, Error, TEXT("%s is false ,file:(%s), funcion:(%s)"), TEXT(#x), *FString(__FILE__), *FString(__FUNCTION__)) \
+	return __VA_ARGS__; \
 }
 
 #define ENSURE_NO_ENTRY \

@@ -5,11 +5,11 @@
 
 #include "Proj.h"
 
-/*void AProjGameModeBase::BeginPlay()
+void AProjGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	class GunBase
+	/*class GunBase
 	{
 	public:
 
@@ -62,8 +62,8 @@
 		Guns[i].Get()->Shoot();
 		
 		G->Shoot();
-	}
-}*/
+	}*/
+}
 
 namespace Tests
 {
@@ -324,7 +324,7 @@ namespace Tests
 // 7 - Refactor (this is terrible, just change everything. DONT USE NAMESPACES IN OUR PROJECT, If there are naming conflicts, just rename your class. Our coding standards explicitly FORBID using namespaces)
 // And don't forget that namespaces aren't the only thing wrong with this!
 
-void AProjGameModeBase::BeginPlay()
+/*void AProjGameModeBase::BeginPlay()
 {
 	return;
 	
@@ -449,4 +449,4 @@ void AProjGameModeBase::BeginPlay()
 			}
 		}
 	}
-}
+}*/

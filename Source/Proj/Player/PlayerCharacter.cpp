@@ -14,6 +14,7 @@
 #include "PlayerReplicationComponent.h"
 #include "ProjHUD.h"
 #include "WeaponComponent.h"
+#include "Components/VisualChildActorComponent.h"
 #include "GameFramework/HUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "Objects/PhysGun.h"
@@ -45,11 +46,13 @@ APlayerCharacter::APlayerCharacter()
 	ItemAnchor = CreateDefaultSubobject<USceneComponent>(TEXT("ItemAnchor"));
 	ItemAnchor->SetupAttachment(Camera);
 
-	PhysGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PhysGun"));
-	PhysGun->SetupAttachment(ItemAnchor);
+	PhysGunAnchor = CreateDefaultSubobject<UVisualChildActorComponent>(TEXT("PhysGunAnchor"));
+	PhysGunAnchor->SetupAttachment(ItemAnchor);
+	PhysGunAnchor->SetAutoActivate(false);
 
-	Pistol = CreateDefaultSubobject<UChildActorComponent>(TEXT("Pistol"));
-	Pistol->SetupAttachment(ItemAnchor);
+	PistolAnchor = CreateDefaultSubobject<UVisualChildActorComponent>(TEXT("PistolAnchor"));
+	PistolAnchor->SetupAttachment(ItemAnchor);
+	PistolAnchor->SetAutoActivate(false);
 }
 
 // Called when the game starts or when spawned
@@ -57,14 +60,12 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	TArray<UActorComponent*> Components = GetComponentsByClass(UPlayerComponent::StaticClass());
-
-	for (UActorComponent* Component : Components)
+	TArray<UPlayerComponent*> Components;
+	GetComponents<UPlayerComponent>(Components);
+	for (UPlayerComponent* Component : Components)
 	{
-		Cast<UPlayerComponent>(Component)->SetupPlayerComponent(this);
+		Component->SetupPlayerComponent(this);
 	}
-
-	WeaponComponent->SetGun(Cast<APhysGun>(PhysGun->GetChildActor()));
 }
 
 // Called every frame
@@ -82,7 +83,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		
 		Text += FString::Printf(TEXT("Name: %s\nWeapon Selected: %i\nLocalNetRole: %s\nRemoteNetRole: %s\nNetMode: %s"),
 			*GetName(),
-			WeaponComponent->GetSelectedWeapon(),
+			WeaponComponent->GetSelectedWeaponIndex(),
 			*NetRoleToString(GetLocalRole()),
 			*NetRoleToString(GetRemoteRole()),
 			*MyNetModeToString(GetNetMode())

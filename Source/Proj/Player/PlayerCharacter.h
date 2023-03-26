@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UVisualChildActorComponent;
 class UWeaponComponent;
 class UCameraComponent;
 class UPhysicsConstraintComponent;
@@ -62,10 +63,10 @@ public:
 	USceneComponent* ItemAnchor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UChildActorComponent* PhysGun;
+	UVisualChildActorComponent* PhysGunAnchor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UChildActorComponent* Pistol;
+	UVisualChildActorComponent* PistolAnchor;
 
 protected:
 

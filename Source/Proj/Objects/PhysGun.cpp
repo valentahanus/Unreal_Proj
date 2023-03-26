@@ -69,6 +69,9 @@ void APhysGun::Fire()
 	}
 
 	//TraceResult.GetActor()->SetActorLocation(TraceLocation);
+
+	ENSURE_NOTNULL(PhysicsConstraint)
+	ENSURE_NOTNULL(ConstraintDummy)
 	
 	PhysicsConstraint->SetConstrainedComponents(
 		Cast<UPrimitiveComponent>(TraceResult.GetActor()->GetRootComponent()),

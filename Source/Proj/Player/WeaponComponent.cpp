@@ -11,6 +11,9 @@
 
 #include "DrawDebugHelpers.h"
 #include "PlayerCharacter.h"
+#include "Components/VisualChildActorComponent.h"
+
+#include <cassert>
 
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
@@ -32,38 +35,76 @@ UWeaponComponent::UWeaponComponent()
 void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 {
 	Super::SetupPlayerComponent(InOwningCharacter);
-
-	// ...
-	Client_ForceSelectedWeapon(static_cast<uint8>(EWeapon::None));
-}
-
-void UWeaponComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
+	
 	HeldGuns.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
-	VisibleGuns.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
+
+	if (OwningCharacter->IsLocallyControlled())
+	{
+		SpawnGun(EWeapon::PhysGun, OwningCharacter->PhysGunAnchor);
+		SpawnGun(EWeapon::Pistol, OwningCharacter->PistolAnchor);
+
+		APhysGun* PhysGun = static_cast<APhysGun*>(GetWeaponInfo(EWeapon::PhysGun).HeldGun);
+                                                                 	
+        PhysGun->SetPhysicsConstraint(OwningCharacter->GetPhysicsConstraint());
+        PhysGun->SetConstraintDummy(OwningCharacter->GetConstraintDummy());
+        
+        LastGunRotation.Init(OwningCharacter->PhysGunAnchor->GetComponentRotation(), WobblyGunBufferSize);
+	}
+
+	if (OwningCharacter->GetLocalRole() == ENetRole::ROLE_Authority)
+	{
+		Client_ForceSelectedWeapon(static_cast<uint8>(EWeapon::None));
+	}
 }
 
+void UWeaponComponent::SpawnGun(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
+{
+	ENSURE_TRUE(OwningCharacter->IsLocallyControlled())
+	
+	ENSURE_TRUE(WeaponIndex != EWeapon::None);
+	ENSURE_NOTNULL(VisualComponent);
+
+	AGunBase* Spawned = GetWorld()->SpawnActor<AGunBase>(VisualComponent->GetChildActorClass());
+	ENSURE_NOTNULL(Spawned)
+
+	Spawned->AttachToComponent(VisualComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	GetWeaponInfo(WeaponIndex).HeldGun = Spawned;
+	GetWeaponInfo(WeaponIndex).HeldGunOwner = VisualComponent;
+}
+
+void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UWeaponComponent, SelectedWeaponIndex);
+}
 
 // Called every frame
 void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FRotator CurrentRotation = OwningCharacter->PhysGun->GetComponentRotation();
-	
-	PhysGun->SetActorRotation(FMath::Lerp(LastGunRotation[index], PhysGun->GetActorRotation(), WobblyGunInterpolationStrength));
-	
-	LastGunRotation[index] = CurrentRotation;
-
-	index++;
-	index %= WobblyGunBufferSize;
+	if (OwningCharacter->IsLocallyControlled() && SelectedWeaponIndex != EWeapon::None)
+	{
+		USceneComponent* GunOwner = GetWeaponInfo(SelectedWeaponIndex).HeldGunOwner;
+		AGunBase* Gun = GetWeaponInfo(SelectedWeaponIndex).HeldGun;
+		
+        ENSURE_NOTNULL(Gun)
+        ENSURE_NOTNULL(GunOwner);
+        
+        FRotator CurrentRotation = GunOwner->GetComponentRotation();
+        Gun->SetActorRotation(FMath::Lerp(LastGunRotation[index], Gun->GetActorRotation(), WobblyGunInterpolationStrength));
+        LastGunRotation[index] = CurrentRotation;
+    
+        index++;
+        index %= WobblyGunBufferSize;
+	}
 }
 
 void UWeaponComponent::OnRep_SelectedWeapon()
 {
-	switch (SelectedWeapon)
+	switch (SelectedWeaponIndex)
 	{
 	case EWeapon::None:
 		{
@@ -90,31 +131,31 @@ void UWeaponComponent::OnRep_SelectedWeapon()
 	}
 }
 
-EWeapon UWeaponComponent::GetSelectedWeapon()
+EWeapon UWeaponComponent::GetSelectedWeaponIndex()
 {
-	return SelectedWeapon;
+	return SelectedWeaponIndex;
 }
 
 void UWeaponComponent::FirstSlotSelected()
 {
 
-	OwningCharacter->Pistol->SetHiddenInGame(false, true);
-	OwningCharacter->PhysGun->SetHiddenInGame(true, true);
+	OwningCharacter->PistolAnchor->SetHiddenInGame(false, true);
+	OwningCharacter->PhysGunAnchor->SetHiddenInGame(true, true);
 	
 	OnWeaponSelected.ExecuteIfBound(EWeapon::Pistol);
 }
 
 void UWeaponComponent::SecondSlotSelected()
 {
-	OwningCharacter->PhysGun->SetHiddenInGame(false, true);
-	OwningCharacter->Pistol->SetHiddenInGame(true, true);
+	OwningCharacter->PhysGunAnchor->SetHiddenInGame(false, true);
+	OwningCharacter->PistolAnchor->SetHiddenInGame(true, true);
 	
 	OnWeaponSelected.ExecuteIfBound(EWeapon::PhysGun);
 }
 
 void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponIndex)
 {
-	SelectedWeapon = static_cast<EWeapon>(WeaponIndex);
+	SelectedWeaponIndex = static_cast<EWeapon>(WeaponIndex);
 
 	if (OwningCharacter->IsLocallyControlled())
 	{
@@ -124,7 +165,7 @@ void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponInd
 
 void UWeaponComponent::Client_ForceSelectedWeapon_Implementation(uint8 WeaponIndex)
 {
-	SelectedWeapon = static_cast<EWeapon>(WeaponIndex);
+	SelectedWeaponIndex = static_cast<EWeapon>(WeaponIndex);
 
 	OnRep_SelectedWeapon();
 }
@@ -136,39 +177,20 @@ void UWeaponComponent::SelectWeapon(uint8 WeaponIndex)
 
 void UWeaponComponent::Fire()
 {
-	switch (SelectedWeapon)
+	if (SelectedWeaponIndex == EWeapon::None)
 	{
-	case EWeapon::PhysGun:
-		PhysGun->Fire();
-		break;
-
-	case EWeapon::Pistol:
-		break;
-
-	case EWeapon::None:
-		break;
-		
-	default:
-		TEXT("Problem no weapon selected");
-		break;
+		return;
 	}
+
+	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
+	
+	GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire();
 }
 
-void UWeaponComponent::SetGun(APhysGun* InGun)
+FWeaponInfo& UWeaponComponent::GetWeaponInfo(EWeapon WeaponType)
 {
-	ENSURE_NOTNULL(InGun);
-	
-	PhysGun = InGun;
+	assert(HeldGuns.Num() > 0);
+	ENSURE_TRUE(WeaponType != EWeapon::None, HeldGuns[0]);
 
-	PhysGun->SetPhysicsConstraint(OwningCharacter->GetPhysicsConstraint());
-	PhysGun->SetConstraintDummy(OwningCharacter->GetConstraintDummy());
-	
-	LastGunRotation.Init(OwningCharacter->PhysGun->GetComponentRotation(), WobblyGunBufferSize);
-}
-
-void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UWeaponComponent, SelectedWeapon);
+	return HeldGuns[static_cast<int32>(WeaponType) - 1];
 }

@@ -10,6 +10,11 @@ public class Proj : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Slate", "SlateCore", "UMG" });
 
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(new string[] { "UnrealEd" });
+		}
+
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		
 		PrivateIncludePaths.AddRange(new string[]{"Proj"});

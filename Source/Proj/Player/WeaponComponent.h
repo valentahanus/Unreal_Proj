@@ -20,6 +20,22 @@ DECLARE_DELEGATE_OneParam(FOnWeaponSelectedDelegate, EWeapon);
 
 class UCameraComponent;
 class APhysGun;
+class UVisualChildActorComponent;
+
+USTRUCT()
+struct FWeaponInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	AGunBase* HeldGun = nullptr;
+	
+	UPROPERTY()
+	AGunBase* VisualGun = nullptr;
+
+	UPROPERTY()
+	USceneComponent* HeldGunOwner = nullptr;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJ_API UWeaponComponent : public UPlayerComponent
@@ -38,23 +54,21 @@ protected: // Called when the game starts
 	virtual void SetupPlayerComponent(APlayerCharacter* InOwningCharacter) override;
 
 public:
-
-	virtual void BeginPlay() override;
-
+	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected: // Replication
 
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_SelectedWeapon)
-	EWeapon SelectedWeapon;
+	EWeapon SelectedWeaponIndex;
 
 	UFUNCTION()
 	void OnRep_SelectedWeapon();
 
 public: // Weapons
 
-	EWeapon GetSelectedWeapon();
+	EWeapon GetSelectedWeaponIndex();
 
 protected: // VFX
 
@@ -93,10 +107,7 @@ public: // Actions
 private: // Guns
 
 	UPROPERTY()
-	TArray<AGunBase*> HeldGuns;
-
-	UPROPERTY()
-	TArray<AGunBase*> VisibleGuns;
+	TArray<FWeaponInfo> HeldGuns;
 
 	TArray<FRotator> LastGunRotation;
 
@@ -108,14 +119,9 @@ private: // Guns
 	UPROPERTY(EditDefaultsOnly)
 	float WobblyGunInterpolationStrength;
 
-public:
+public: // Locally controlled client only
 
-	void SetGun(APhysGun* InGun);
-
-	void SetHeldGun(EWeapon WeaponType, AGunBase* Weapon)
-	{
-		// problem ensure that weapontype is not zero
-		
-		HeldGuns[static_cast<int32>(WeaponType) - 1] = Weapon;
-	}
+	void SpawnGun(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent);
+	
+	FWeaponInfo& GetWeaponInfo(EWeapon WeaponType);
 };
