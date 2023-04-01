@@ -53,6 +53,14 @@ APlayerCharacter::APlayerCharacter()
 	PistolAnchor = CreateDefaultSubobject<UVisualChildActorComponent>(TEXT("PistolAnchor"));
 	PistolAnchor->SetupAttachment(ItemAnchor);
 	PistolAnchor->SetAutoActivate(false);
+
+	MultiplayerPistolAnchor = CreateDefaultSubobject<UVisualChildActorComponent>(TEXT("MultiplayerPistolAnchor"));
+	MultiplayerPistolAnchor->SetupAttachment(GetMesh(), TEXT("hand_r_socket"));
+	MultiplayerPistolAnchor->SetAutoActivate(false);
+
+	MultiplayerPhysGunAnchor = CreateDefaultSubobject<UVisualChildActorComponent>(TEXT("MultiplayerPhysGunAnchor"));
+	MultiplayerPhysGunAnchor->SetupAttachment(GetMesh(), TEXT("hand_r_socket"));
+	MultiplayerPhysGunAnchor->SetAutoActivate(false);
 }
 
 // Called when the game starts or when spawned

@@ -29,12 +29,17 @@ struct FWeaponInfo
 
 	UPROPERTY()
 	AGunBase* HeldGun = nullptr;
+
+	UPROPERTY()
+	USceneComponent* HeldGunOwner = nullptr;
+
+public:
 	
 	UPROPERTY()
 	AGunBase* VisualGun = nullptr;
 
 	UPROPERTY()
-	USceneComponent* HeldGunOwner = nullptr;
+	USceneComponent* VisualGunOwner = nullptr;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -121,7 +126,11 @@ private: // Guns
 
 public: // Locally controlled client only
 
-	void SpawnGun(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent);
+	void SpawnGun_Client(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent);
 	
 	FWeaponInfo& GetWeaponInfo(EWeapon WeaponType);
+
+private: // Simulated proxy only
+
+	void SpawnGun_SimulatedProxy(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent);
 };

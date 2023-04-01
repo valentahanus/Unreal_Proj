@@ -68,6 +68,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UVisualChildActorComponent* PistolAnchor;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UVisualChildActorComponent* MultiplayerPhysGunAnchor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UVisualChildActorComponent* MultiplayerPistolAnchor;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

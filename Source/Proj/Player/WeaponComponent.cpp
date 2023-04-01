@@ -40,8 +40,8 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 
 	if (OwningCharacter->IsLocallyControlled())
 	{
-		SpawnGun(EWeapon::PhysGun, OwningCharacter->PhysGunAnchor);
-		SpawnGun(EWeapon::Pistol, OwningCharacter->PistolAnchor);
+		SpawnGun_Client(EWeapon::PhysGun, OwningCharacter->PhysGunAnchor);
+		SpawnGun_Client(EWeapon::Pistol, OwningCharacter->PistolAnchor);
 
 		APhysGun* PhysGun = static_cast<APhysGun*>(GetWeaponInfo(EWeapon::PhysGun).HeldGun);
                                                                  	
@@ -50,6 +50,11 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
         
         LastGunRotation.Init(OwningCharacter->PhysGunAnchor->GetComponentRotation(), WobblyGunBufferSize);
 	}
+	else
+	{
+		SpawnGun_SimulatedProxy(EWeapon::PhysGun, OwningCharacter->MultiplayerPhysGunAnchor);	
+		SpawnGun_SimulatedProxy(EWeapon::Pistol, OwningCharacter->MultiplayerPistolAnchor);	
+	}
 
 	if (OwningCharacter->GetLocalRole() == ENetRole::ROLE_Authority)
 	{
@@ -57,7 +62,7 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 	}
 }
 
-void UWeaponComponent::SpawnGun(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
+void UWeaponComponent::SpawnGun_Client(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
 {
 	ENSURE_TRUE(OwningCharacter->IsLocallyControlled())
 	
@@ -73,6 +78,22 @@ void UWeaponComponent::SpawnGun(EWeapon WeaponIndex, UVisualChildActorComponent*
 	GetWeaponInfo(WeaponIndex).HeldGunOwner = VisualComponent;
 }
 
+void UWeaponComponent::SpawnGun_SimulatedProxy(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
+{
+	ENSURE_TRUE(!OwningCharacter->IsLocallyControlled())
+	
+	ENSURE_TRUE(WeaponIndex != EWeapon::None);
+	ENSURE_NOTNULL(VisualComponent);
+
+	AGunBase* Spawned = GetWorld()->SpawnActor<AGunBase>(VisualComponent->GetChildActorClass());
+	ENSURE_NOTNULL(Spawned)
+
+	Spawned->AttachToComponent(VisualComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	GetWeaponInfo(WeaponIndex).VisualGun = Spawned;
+	GetWeaponInfo(WeaponIndex).VisualGunOwner = VisualComponent;
+}
+
 void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -85,6 +106,7 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// Wobbly gun
 	if (OwningCharacter->IsLocallyControlled() && SelectedWeaponIndex != EWeapon::None)
 	{
 		USceneComponent* GunOwner = GetWeaponInfo(SelectedWeaponIndex).HeldGunOwner;
