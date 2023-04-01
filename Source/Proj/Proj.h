@@ -14,7 +14,7 @@ if (bTriggered == false) \
 { \
     UE_DEBUG_BREAK(); \
     bTriggered = true; \
-} \
+}
 
 #define ENSURE_NOTNULL(x, ...) \
 if ((x) == nullptr) \
