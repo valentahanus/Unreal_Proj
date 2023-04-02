@@ -36,7 +36,7 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 {
 	Super::SetupPlayerComponent(InOwningCharacter);
 	
-	HeldGuns.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
+	WeaponArray.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
 
 	if (OwningCharacter->IsLocallyControlled())
 	{
@@ -126,53 +126,22 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UWeaponComponent::OnRep_SelectedWeapon()
 {
-	switch (SelectedWeaponIndex)
+	uint8 Index = 1;
+	for (FWeaponInfo& Weapon : WeaponArray)
 	{
-	case EWeapon::None:
+		if (Weapon.HeldGunOwner != nullptr)
 		{
-			
+			Weapon.HeldGunOwner->SetHiddenInGame(Index != static_cast<uint8>(SelectedWeaponIndex), true);
 		}
-		break;
 		
-	case EWeapon::Pistol:
-		{
-			FirstSlotSelected();
-		}
-		break;
-		
-	case EWeapon::PhysGun:
-		{
-			SecondSlotSelected();
-		}
-		break;
-
-	default:
-		{
-			check(false);
-		}
+		Index++;
 	}
+	OnWeaponSelected.ExecuteIfBound(SelectedWeaponIndex);
 }
 
 EWeapon UWeaponComponent::GetSelectedWeaponIndex()
 {
 	return SelectedWeaponIndex;
-}
-
-void UWeaponComponent::FirstSlotSelected()
-{
-
-	OwningCharacter->PistolAnchor->SetHiddenInGame(false, true);
-	OwningCharacter->PhysGunAnchor->SetHiddenInGame(true, true);
-	
-	OnWeaponSelected.ExecuteIfBound(EWeapon::Pistol);
-}
-
-void UWeaponComponent::SecondSlotSelected()
-{
-	OwningCharacter->PhysGunAnchor->SetHiddenInGame(false, true);
-	OwningCharacter->PistolAnchor->SetHiddenInGame(true, true);
-	
-	OnWeaponSelected.ExecuteIfBound(EWeapon::PhysGun);
 }
 
 void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponIndex)
@@ -212,7 +181,7 @@ void UWeaponComponent::Fire()
 FWeaponInfo& UWeaponComponent::GetWeaponInfo(EWeapon WeaponType)
 {
 	assert(HeldGuns.Num() > 0);
-	ENSURE_TRUE(WeaponType != EWeapon::None, HeldGuns[0]);
+	ENSURE_TRUE(WeaponType != EWeapon::None, WeaponArray[0]);
 
-	return HeldGuns[static_cast<int32>(WeaponType) - 1];
+	return WeaponArray[static_cast<int32>(WeaponType) - 1];
 }

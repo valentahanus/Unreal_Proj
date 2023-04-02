@@ -85,11 +85,6 @@ public: // Switching
 	void RequestFirstSlotSelected() { Server_RequestWeaponChange(static_cast<uint8>(EWeapon::Pistol)); }
 	void RequestSecondSlotSelected() { Server_RequestWeaponChange(static_cast<uint8>(EWeapon::PhysGun)); }
 
-private: // Switching
-
-	void FirstSlotSelected();
-	void SecondSlotSelected();
-
 private: // Client -> Server
 
 	UFUNCTION(Server, Reliable)
@@ -112,7 +107,7 @@ public: // Actions
 private: // Guns
 
 	UPROPERTY()
-	TArray<FWeaponInfo> HeldGuns;
+	TArray<FWeaponInfo> WeaponArray;
 
 	TArray<FRotator> LastGunRotation;
 
