@@ -14,5 +14,5 @@ class PROJ_API UVisualChildActorComponent : public UChildActorComponent
 {
 	GENERATED_BODY()
 
-	virtual void CreateChildActor() override;
+	virtual void CreateChildActor(TFunction<void(AActor*)> CustomizerFunc) override;
 };

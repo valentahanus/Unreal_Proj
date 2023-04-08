@@ -2,7 +2,7 @@
 
 #include "Components/VisualChildActorComponent.h"
 
-void UVisualChildActorComponent::CreateChildActor()
+void UVisualChildActorComponent::CreateChildActor(TFunction<void(AActor*)> CustomizerFunc)
 {
 #if WITH_EDITOR
 	if (GetOwner())
