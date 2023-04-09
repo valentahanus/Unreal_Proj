@@ -143,7 +143,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::Fire()
 {
-	WeaponComponent->Fire();
+	WeaponComponent->Server_Fire();
 }
 
 void APlayerCharacter::Drop()

@@ -38,10 +38,10 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 	
 	WeaponArray.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
 
-	if (OwningCharacter->IsLocallyControlled())
+	if (OwningCharacter->IsLocallyControlled() || OwningCharacter->GetLocalRole() == ROLE_Authority)
 	{
-		SpawnGun_Client(EWeapon::PhysGun, OwningCharacter->PhysGunAnchor);
-		SpawnGun_Client(EWeapon::Pistol, OwningCharacter->PistolAnchor);
+		SpawnGun_ServerOrClient(EWeapon::PhysGun, OwningCharacter->PhysGunAnchor);
+		SpawnGun_ServerOrClient(EWeapon::Pistol, OwningCharacter->PistolAnchor);
 
 		APhysGun* PhysGun = static_cast<APhysGun*>(GetWeaponInfo(EWeapon::PhysGun).HeldGun);
                                                                  	
@@ -58,13 +58,13 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 
 	if (OwningCharacter->GetLocalRole() == ENetRole::ROLE_Authority)
 	{
-		Client_ForceSelectedWeapon(static_cast<uint8>(EWeapon::None));
+		Server_RequestWeaponChange_Implementation(static_cast<uint8>(EWeapon::None));
 	}
 }
 
-void UWeaponComponent::SpawnGun_Client(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
+void UWeaponComponent::SpawnGun_ServerOrClient(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
 {
-	ENSURE_TRUE(OwningCharacter->IsLocallyControlled())
+	ENSURE_TRUE(OwningCharacter->IsLocallyControlled() || OwningCharacter->GetLocalRole() == ROLE_Authority)
 	
 	ENSURE_TRUE(WeaponIndex != EWeapon::None);
 	ENSURE_NOTNULL(VisualComponent);
@@ -133,6 +133,11 @@ void UWeaponComponent::OnRep_SelectedWeapon()
 		{
 			Weapon.HeldGunOwner->SetHiddenInGame(Index != static_cast<uint8>(SelectedWeaponIndex), true);
 		}
+
+		if (Weapon.VisualGunOwner != nullptr)
+		{
+			Weapon.VisualGunOwner->SetHiddenInGame(Index != static_cast<uint8>(SelectedWeaponIndex), true);
+		}
 		
 		Index++;
 	}
@@ -154,19 +159,12 @@ void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponInd
 	}
 }
 
-void UWeaponComponent::Client_ForceSelectedWeapon_Implementation(uint8 WeaponIndex)
-{
-	SelectedWeaponIndex = static_cast<EWeapon>(WeaponIndex);
-
-	OnRep_SelectedWeapon();
-}
-
 void UWeaponComponent::SelectWeapon(uint8 WeaponIndex)
 {
 	Server_RequestWeaponChange(WeaponIndex);
 }
 
-void UWeaponComponent::Fire()
+void UWeaponComponent::Server_Fire_Implementation()
 {
 	if (SelectedWeaponIndex == EWeapon::None)
 	{

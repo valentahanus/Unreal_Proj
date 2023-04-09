@@ -27,13 +27,15 @@ struct FWeaponInfo
 {
 	GENERATED_BODY()
 
+public: // local client only
+
 	UPROPERTY()
 	AGunBase* HeldGun = nullptr;
 
 	UPROPERTY()
 	USceneComponent* HeldGunOwner = nullptr;
 
-public:
+public: // non local only
 	
 	UPROPERTY()
 	AGunBase* VisualGun = nullptr;
@@ -90,19 +92,17 @@ private: // Client -> Server
 	UFUNCTION(Server, Reliable)
 	void Server_RequestWeaponChange(uint8 WeaponIndex);
 
+public: // Client -> Server
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Fire();
+	
 private: // Server -> Client
-
-	UFUNCTION(Client, Reliable)
-	void Client_ForceSelectedWeapon(uint8 WeaponIndex);
 
 private: // Cheats
 
 	UFUNCTION(Exec)
 	void SelectWeapon(uint8 WeaponIndex);
-
-public: // Actions
-
-	void Fire();
 
 private: // Guns
 
@@ -121,7 +121,7 @@ private: // Guns
 
 public: // Locally controlled client only
 
-	void SpawnGun_Client(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent);
+	void SpawnGun_ServerOrClient(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent);
 	
 	FWeaponInfo& GetWeaponInfo(EWeapon WeaponType);
 
