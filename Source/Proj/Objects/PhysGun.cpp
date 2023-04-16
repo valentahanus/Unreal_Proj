@@ -27,9 +27,9 @@ void APhysGun::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void APhysGun::Fire()
+void APhysGun::Fire(FRotator CharacterRotation)
 {
-	Super::Fire();
+	Super::Fire(CharacterRotation);
 
 	FCollisionQueryParams QueryParams = FCollisionQueryParams();
 	QueryParams.bReturnPhysicalMaterial = false;
@@ -40,12 +40,12 @@ void APhysGun::Fire()
 	QueryParams.AddIgnoredActor(this);
 	
 	FHitResult TraceResult;
-	FRotator ShootRotation = GetActorRotation();
+	FRotator ShootRotation = CharacterRotation;
 	FVector ShootLocation = GetActorLocation();
 
 	double PickupRange = 200;
 
-	FVector ShootDirection = ShootRotation.RotateVector(FVector(-1, 0, 0));
+	FVector ShootDirection = ShootRotation.RotateVector(FVector(1, 0, 0));
 	FVector TraceOffset = ShootDirection * PickupRange;
 	FVector TraceLocation = ShootLocation + TraceOffset;
 	

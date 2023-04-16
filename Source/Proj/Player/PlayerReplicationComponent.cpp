@@ -52,6 +52,6 @@ void UPlayerReplicationComponent::Server_SendRotation_Implementation(double Yaw,
 	OwningCharacter->SetActorRotation(FRotator( 0,Yaw,0));
 	ViewPitch = Pitch;
 
-	// TODO replicate camera pitch
+	OwningCharacter->Camera->SetRelativeRotation(FRotator(Pitch, 0, 0));
 }
 

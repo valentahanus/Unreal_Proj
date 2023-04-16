@@ -13,7 +13,12 @@ class PROJ_API AGunBase : public AActor
 
 public:
 
-	virtual void Fire();
+	virtual void Fire(FRotator CharacterRotation);
+
+public: // public vfx
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ClientPlayVFX(FRotator CharacterRotation);
 
 protected: // VFX
 

@@ -55,11 +55,8 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 		SpawnGun_SimulatedProxy(EWeapon::PhysGun, OwningCharacter->MultiplayerPhysGunAnchor);	
 		SpawnGun_SimulatedProxy(EWeapon::Pistol, OwningCharacter->MultiplayerPistolAnchor);	
 	}
-
-	if (OwningCharacter->GetLocalRole() == ENetRole::ROLE_Authority)
-	{
-		Server_RequestWeaponChange_Implementation(static_cast<uint8>(EWeapon::None));
-	}
+	
+	OnRep_SelectedWeapon();
 }
 
 void UWeaponComponent::SpawnGun_ServerOrClient(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
@@ -159,12 +156,7 @@ void UWeaponComponent::Server_RequestWeaponChange_Implementation(uint8 WeaponInd
 	}
 }
 
-void UWeaponComponent::SelectWeapon(uint8 WeaponIndex)
-{
-	Server_RequestWeaponChange(WeaponIndex);
-}
-
-void UWeaponComponent::Server_Fire_Implementation()
+void UWeaponComponent::Fire(FRotator CharacterRotation)
 {
 	if (SelectedWeaponIndex == EWeapon::None)
 	{
@@ -173,7 +165,26 @@ void UWeaponComponent::Server_Fire_Implementation()
 
 	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
 	
-	GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire();
+	GetWeaponInfo(SelectedWeaponIndex).HeldGun->ClientPlayVFX(CharacterRotation);
+	
+	Server_Fire(CharacterRotation);
+}
+
+void UWeaponComponent::SelectWeapon(uint8 WeaponIndex)
+{
+	Server_RequestWeaponChange(WeaponIndex);
+}
+
+void UWeaponComponent::Server_Fire_Implementation(FRotator CharacterRotation)
+{
+	if (SelectedWeaponIndex == EWeapon::None)
+	{
+		return;
+	}
+
+	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
+	
+	GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire(CharacterRotation);
 }
 
 FWeaponInfo& UWeaponComponent::GetWeaponInfo(EWeapon WeaponType)

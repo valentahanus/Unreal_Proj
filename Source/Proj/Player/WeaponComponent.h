@@ -92,10 +92,14 @@ private: // Client -> Server
 	UFUNCTION(Server, Reliable)
 	void Server_RequestWeaponChange(uint8 WeaponIndex);
 
-public: // Client -> Server
+private: // Client -> Server
 	
 	UFUNCTION(Server, Reliable)
-	void Server_Fire();
+	void Server_Fire(FRotator CharacterRotation);
+
+public:
+	
+	void Fire(FRotator CharacterRotation);
 	
 private: // Server -> Client
 

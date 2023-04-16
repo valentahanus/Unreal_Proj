@@ -26,7 +26,7 @@ public:
 
 public:
 	// Fire override
-	virtual void Fire() override;
+	virtual void Fire(FRotator CharacterRotation) override;
 
 public:
 

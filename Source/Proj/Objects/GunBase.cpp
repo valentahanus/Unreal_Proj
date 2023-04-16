@@ -5,7 +5,7 @@
 
 #include "Proj.h"
 
-void AGunBase::Fire()
+void AGunBase::Fire(FRotator CharacterRotation)
 {
 	OnFired();
 	LOG("fired!")
