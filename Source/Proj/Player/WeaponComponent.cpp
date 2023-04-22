@@ -185,6 +185,17 @@ void UWeaponComponent::Server_Fire_Implementation(FRotator CharacterRotation)
 	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
 	
 	GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire(CharacterRotation);
+	
+	MultiCast_OnFired();
+}
+
+void UWeaponComponent::MultiCast_OnFired_Implementation()
+{
+	if (GetWeaponInfo(SelectedWeaponIndex).VisualGun == nullptr)
+	{
+		return;
+	}
+	GetWeaponInfo(SelectedWeaponIndex).VisualGun->ClientPlayVFX(OwningCharacter->Camera->GetComponentRotation());
 }
 
 FWeaponInfo& UWeaponComponent::GetWeaponInfo(EWeapon WeaponType)

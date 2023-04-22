@@ -100,6 +100,9 @@ private: // Client -> Server
 public:
 	
 	void Fire(FRotator CharacterRotation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiCast_OnFired();
 	
 private: // Server -> Client
 

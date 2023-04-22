@@ -86,8 +86,6 @@ public: // Picking up
 	
 	void Fire();
 
-	void Drop();
-
 private: // Movement
 
 	// Speeds up player speed 

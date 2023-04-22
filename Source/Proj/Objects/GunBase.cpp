@@ -8,5 +8,4 @@
 void AGunBase::Fire(FRotator CharacterRotation)
 {
 	OnFired();
-	LOG("fired!")
 }

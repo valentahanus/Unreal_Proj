@@ -31,6 +31,32 @@ void APhysGun::Fire(FRotator CharacterRotation)
 {
 	Super::Fire(CharacterRotation);
 
+	if (PhysicsConstraint->OverrideComponent1.IsValid())
+	{
+		Drop(CharacterRotation);
+	}
+	else
+	{
+		PickUp(CharacterRotation);	
+	}
+}
+
+void APhysGun::Drop(FRotator CharacterRotation)
+{
+	PhysicsConstraint->BreakConstraint();
+	
+	PhysicsConstraint->SetConstrainedComponents(
+		nullptr,
+		FName(),
+		nullptr,
+		FName()
+	);
+
+	LOG("Droped")
+}
+
+void APhysGun::PickUp(FRotator CharacterRotation)
+{
 	FCollisionQueryParams QueryParams = FCollisionQueryParams();
 	QueryParams.bReturnPhysicalMaterial = false;
 	QueryParams.bIgnoreTouches = true;
@@ -80,4 +106,3 @@ void APhysGun::Fire(FRotator CharacterRotation)
 		FName()
 	);
 }
-

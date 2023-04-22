@@ -28,6 +28,12 @@ public:
 	// Fire override
 	virtual void Fire(FRotator CharacterRotation) override;
 
+private:
+
+	void Drop(FRotator CharacterRotation);
+
+	void PickUp(FRotator CharacterRotation);
+
 public:
 
 	void SetPhysicsConstraint(UPhysicsConstraintComponent* InPhysicsConstraint) { PhysicsConstraint = InPhysicsConstraint; }

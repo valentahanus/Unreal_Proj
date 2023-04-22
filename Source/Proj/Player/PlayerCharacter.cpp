@@ -131,7 +131,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// Unreal input called functions
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &APlayerCharacter::Jump);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &APlayerCharacter::Fire);
-	PlayerInputComponent->BindAction("Drop", EInputEvent::IE_Pressed, this, &APlayerCharacter::Drop);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &APlayerCharacter::Run);
 	PlayerInputComponent->BindAxis("CameraHorizontal", this, &APlayerCharacter::RotateCharacterHorizontal);
 	PlayerInputComponent->BindAxis("CameraVertical", this, &APlayerCharacter::RotateCameraVertical);
@@ -144,12 +143,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::Fire()
 {
 	WeaponComponent->Fire(Camera->GetComponentRotation());
-}
-
-void APlayerCharacter::Drop()
-{
-	PhysicsConstraint->BreakConstraint();
-	UE_LOG(LogTemp, Warning, TEXT("Drop"));
 }
 
 void APlayerCharacter::Run()
