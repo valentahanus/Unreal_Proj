@@ -165,7 +165,7 @@ void UWeaponComponent::Fire(FRotator CharacterRotation)
 
 	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
 	
-	GetWeaponInfo(SelectedWeaponIndex).HeldGun->ClientPlayVFX(CharacterRotation);
+	GetWeaponInfo(SelectedWeaponIndex).HeldGun->TriggerClientVFX(CharacterRotation);
 	
 	Server_Fire(CharacterRotation);
 }
@@ -195,7 +195,7 @@ void UWeaponComponent::MultiCast_OnFired_Implementation()
 	{
 		return;
 	}
-	GetWeaponInfo(SelectedWeaponIndex).VisualGun->ClientPlayVFX(OwningCharacter->Camera->GetComponentRotation());
+	GetWeaponInfo(SelectedWeaponIndex).VisualGun->TriggerClientVFX(OwningCharacter->Camera->GetComponentRotation());
 }
 
 FWeaponInfo& UWeaponComponent::GetWeaponInfo(EWeapon WeaponType)

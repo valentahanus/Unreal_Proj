@@ -6,6 +6,17 @@
 #include "GunBase.h"
 #include "PhysGun.generated.h"
 
+UCLASS(BlueprintType)
+class UPhysGunEffect : public UGunEffectBase
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsActive = false;
+};
+
 class UPhysicsConstraintComponent;
 UCLASS()
 class PROJ_API APhysGun : public AGunBase
@@ -28,11 +39,15 @@ public:
 	// Fire override
 	virtual void Fire(FRotator CharacterRotation) override;
 
+	virtual void TriggerClientVFX(FRotator CharacterRotation) override;
+
 private:
 
 	void Drop(FRotator CharacterRotation);
 
 	void PickUp(FRotator CharacterRotation);
+
+	bool IsActive();
 
 public:
 

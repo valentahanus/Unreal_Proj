@@ -9,3 +9,8 @@ void AGunBase::Fire(FRotator CharacterRotation)
 {
 	OnFired();
 }
+
+void AGunBase::TriggerClientVFX(FRotator CharacterRotation)
+{
+	ClientPlayVFX(CharacterRotation, nullptr);
+}

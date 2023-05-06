@@ -6,7 +6,6 @@
 #include "Proj.h"
 #include "DrawDebugHelpers.h"
 
-
 // Sets default values
 APhysGun::APhysGun()
 {
@@ -31,7 +30,7 @@ void APhysGun::Fire(FRotator CharacterRotation)
 {
 	Super::Fire(CharacterRotation);
 
-	if (PhysicsConstraint->ConstraintInstance.IsValidConstraintInstance())
+	if (IsActive())
 	{
 		Drop(CharacterRotation);
 	}
@@ -39,6 +38,18 @@ void APhysGun::Fire(FRotator CharacterRotation)
 	{
 		PickUp(CharacterRotation);
 	}
+}
+
+void APhysGun::TriggerClientVFX(FRotator CharacterRotation)
+{
+	UPhysGunEffect* Effect = NewObject<UPhysGunEffect>();
+
+	Effect->bIsActive = IsActive();
+	
+	ClientPlayVFX(CharacterRotation, Effect);
+
+	Effect->ConditionalBeginDestroy();
+	Effect = nullptr;
 }
 
 void APhysGun::Drop(FRotator CharacterRotation)
@@ -99,4 +110,9 @@ void APhysGun::PickUp(FRotator CharacterRotation)
 		FName()
 	);
 	LOG("Picked up")
+}
+
+bool APhysGun::IsActive()
+{
+	return PhysicsConstraint != nullptr && PhysicsConstraint->ConstraintInstance.IsValidConstraintInstance();
 }
