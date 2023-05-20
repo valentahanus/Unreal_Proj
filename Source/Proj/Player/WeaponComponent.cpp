@@ -9,9 +9,10 @@
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
 
-#include "DrawDebugHelpers.h"
-#include "PlayerCharacter.h"
 #include "Components/VisualChildActorComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Misc/FileHelper.h"
+#include "PlayerCharacter.h"
 
 #include <cassert>
 
@@ -181,15 +182,24 @@ void UWeaponComponent::Server_Fire_Implementation(FRotator CharacterRotation)
 	{
 		return;
 	}
-
+	
 	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
 	
-	GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire(CharacterRotation);
-	
-	MultiCast_OnFired();
+	GunEffectVariant Variant = GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire(CharacterRotation);
+
+	int32 VeryUsefulInt = 32;
+	float	VeryUsefulFloatOne = 3.4;
+	float	VeryUsefulFloatTwo = 3.5;
+
+	TArray<uint8> Buffer{};
+	FMemoryWriter Writer{Buffer};
+	Writer << VeryUsefulInt << VeryUsefulFloatOne << VeryUsefulFloatTwo;
+
+	FFileHelper::SaveArrayToFile(Buffer, *(FPaths::ProjectSavedDir() + TEXT("TestSave.sav")));
+	//MultiCast_OnFired(Variant);
 }
 
-void UWeaponComponent::MultiCast_OnFired_Implementation()
+void UWeaponComponent::MultiCast_OnFired_Implementation(const TArray<uint8>& Array)
 {
 	if (GetWeaponInfo(SelectedWeaponIndex).VisualGun == nullptr)
 	{

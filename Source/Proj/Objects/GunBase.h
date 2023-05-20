@@ -3,14 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GunVFX.h"
 #include "GameFramework/Actor.h"
 #include "GunBase.generated.h"
-
-UCLASS()
-class UGunEffectBase : public UObject
-{
-	GENERATED_BODY()
-};
 
 UCLASS()
 class PROJ_API AGunBase : public AActor
@@ -19,7 +14,7 @@ class PROJ_API AGunBase : public AActor
 
 public:
 
-	virtual void Fire(FRotator CharacterRotation);
+	virtual GunEffectVariant Fire(FRotator CharacterRotation);
 
 	virtual void TriggerClientVFX(FRotator CharacterRotation);
 

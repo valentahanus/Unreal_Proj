@@ -26,7 +26,7 @@ void APhysGun::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void APhysGun::Fire(FRotator CharacterRotation)
+GunEffectVariant APhysGun::Fire(FRotator CharacterRotation)
 {
 	Super::Fire(CharacterRotation);
 
@@ -38,6 +38,14 @@ void APhysGun::Fire(FRotator CharacterRotation)
 	{
 		PickUp(CharacterRotation);
 	}
+
+	GunEffectVariant Effect{};
+	UPhysGunEffect* PhysGunEffect = NewObject<UPhysGunEffect>();
+	PhysGunEffect->bIsActive = IsActive();
+
+	Effect.Set<UPhysGunEffect*>(PhysGunEffect);
+
+	return Effect;
 }
 
 void APhysGun::TriggerClientVFX(FRotator CharacterRotation)

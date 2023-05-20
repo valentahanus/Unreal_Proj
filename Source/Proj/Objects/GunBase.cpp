@@ -5,9 +5,11 @@
 
 #include "Proj.h"
 
-void AGunBase::Fire(FRotator CharacterRotation)
+GunEffectVariant AGunBase::Fire(FRotator CharacterRotation)
 {
 	OnFired();
+
+	return {};
 }
 
 void AGunBase::TriggerClientVFX(FRotator CharacterRotation)

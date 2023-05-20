@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PlayerComponent.h"
 #include "Proj.h"
+#include "Objects/GunVFX.h"
 #include "WeaponComponent.generated.h"
 
 class AGunBase;
@@ -102,7 +103,7 @@ public:
 	void Fire(FRotator CharacterRotation);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MultiCast_OnFired();
+	void MultiCast_OnFired(const TArray<uint8>& Array);
 	
 private: // Server -> Client
 
