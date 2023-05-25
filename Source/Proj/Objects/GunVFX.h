@@ -22,3 +22,16 @@ public:
 };
 
 using GunEffectVariant = TVariant<bool, UPhysGunEffect*>;
+
+inline FArchive& operator<<(FArchive& Ar, GunEffectVariant& Variant) {
+	if (Variant.GetIndex() == 0)
+	{
+		return Ar;
+	}
+
+	UGunEffectBase* Value = Visit([] (auto& Value)
+	{
+		return reinterpret_cast<UGunEffectBase*>(Value);
+	}, Variant);
+	return Ar << Value;
+}

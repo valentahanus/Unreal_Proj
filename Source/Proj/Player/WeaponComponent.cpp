@@ -187,15 +187,20 @@ void UWeaponComponent::Server_Fire_Implementation(FRotator CharacterRotation)
 	
 	GunEffectVariant Variant = GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire(CharacterRotation);
 
-	int32 VeryUsefulInt = 32;
-	float	VeryUsefulFloatOne = 3.4;
-	float	VeryUsefulFloatTwo = 3.5;
-
 	TArray<uint8> Buffer{};
 	FMemoryWriter Writer{Buffer};
-	Writer << VeryUsefulInt << VeryUsefulFloatOne << VeryUsefulFloatTwo;
+	
+	Writer << Variant;
 
 	FFileHelper::SaveArrayToFile(Buffer, *(FPaths::ProjectSavedDir() + TEXT("TestSave.sav")));
+
+	Buffer.Reset();
+	Variant = {};
+
+	FFileHelper::LoadFileToArray(Buffer, *(FPaths::ProjectSavedDir() + TEXT("TestSave.sav")));
+
+	FMemoryReader Reader{Buffer};
+	Reader << Variant;
 	//MultiCast_OnFired(Variant);
 }
 
