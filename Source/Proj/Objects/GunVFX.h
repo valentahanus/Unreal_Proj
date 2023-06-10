@@ -12,7 +12,9 @@ class UGunEffectBase : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void SerializeEffect(FArchive &Ar) {};
+	virtual void SerializeEffect(FArchive& Ar)
+	{
+	};
 };
 
 UCLASS(BlueprintType)
@@ -20,7 +22,7 @@ class UPhysGunEffect : public UGunEffectBase
 {
 	GENERATED_BODY()
 
-	virtual void SerializeEffect(FArchive &Ar) override
+	virtual void SerializeEffect(FArchive& Ar) override
 	{
 		Ar << bIsActive;
 	}
@@ -40,20 +42,31 @@ using GunEffectVariant = TVariant<bool, UPhysGunEffect*>;
  * If it finds the type, creates a new instance inside the variant.
  * Otherwise, triggers an assertion
  */
-template<size_t i, class T, class ...Ts>
+template <size_t i, class T, class... Ts>
 void CreateGunEffectByIndex(auto& Variant, int32 TargetIndex)
 {
-	if (i == TargetIndex)
+	// skip first argument (bool)
+	if constexpr (i != 0)
 	{
-		Variant.template Emplace<T>( NewObject<T>() );
-	}
-	else if constexpr (sizeof...(Ts) == 0)
-	{
-		ENSURE_NO_ENTRY
+		using CleanT = std::remove_pointer_t<T>;
+		static_assert(std::derived_from<CleanT, UObject>); // Check if this is a UObject
+		
+		if (i == TargetIndex)
+		{
+			Variant.template Emplace<CleanT*>( NewObject<CleanT>() );
+		}
+		else if constexpr (sizeof...(Ts) > 0)
+		{
+			CreateGunEffectByIndex<i + 1, Ts...>(Variant, TargetIndex);
+		}
+		else
+		{
+			ENSURE_NO_ENTRY
+		}
 	}
 	else
 	{
-		CreateGunEffectByIndex<i + 1, Ts...>(Variant, TargetIndex);
+		CreateGunEffectByIndex<1, Ts...>(Variant, TargetIndex);
 	}
 }
 
@@ -61,14 +74,14 @@ void CreateGunEffectByIndex(auto& Variant, int32 TargetIndex)
  * Creates a new gun effect object inside the provided variant using the provided index
  * If the target index is 0, doesn't populate the variant at all
  */
-template<class ...Ts>
+template <class... Ts>
 void CreateGunEffectByIndex(TVariant<Ts...>& Variant, int32 TargetIndex)
 {
-	static_assert( sizeof...(Ts) > 0 );
+	static_assert(sizeof...(Ts) > 0);
 
 	if (TargetIndex != 0)
 	{
-		return CreateGunEffectByIndex<1, Ts...>(Variant, TargetIndex);
+		return CreateGunEffectByIndex<0, Ts...>(Variant, TargetIndex);
 	}
 }
 
@@ -91,10 +104,8 @@ inline UGunEffectBase* GetGunEffectInsideVariant(GunEffectVariant& Variant)
 	 * [] (int value) { print(value); }										-> Called if there was an int inside
 	 * [] (float value) { print(value); }									-> Called if there was a float inside
 	 */
-	return Visit([](auto item)->UGunEffectBase*
-	{
-		using TemplatedType = std::remove_all_extents_t<decltype(item)>;
-		static constexpr int32 TypeIndex = GunEffectVariant::IndexOfType<TemplatedType>();
+	return Visit([]<class T>(T item)-> UGunEffectBase* {
+		static constexpr int32 TypeIndex = GunEffectVariant::IndexOfType<T>();
 
 		// A compile time 'if', the template generation will generate a different code depending on the condition (we don't want to cast a bool to a gun effect base)
 		if constexpr (TypeIndex != 0)
@@ -105,43 +116,44 @@ inline UGunEffectBase* GetGunEffectInsideVariant(GunEffectVariant& Variant)
 		{
 			ENSURE_TRUE(false, nullptr)
 		}
-		
 	}, Variant);
 }
 
 inline FArchive& operator<<(FArchive& Ar, GunEffectVariant& Variant)
 {
-        if (Ar.IsLoading()) {
-                if (Ar.AtEnd()) {
+	if (Ar.IsLoading())
+	{
+		if (Ar.AtEnd())
+		{
 			Variant = GunEffectVariant{};
 
-                	return Ar;
-                }
+			return Ar;
+		}
 
-        	SIZE_T Index;
-        	Ar << Index;
+		SIZE_T Index;
+		Ar << Index;
 
-        	Variant = GunEffectVariant{};
-        	CreateGunEffectByIndex(Variant, Index);
+		Variant = GunEffectVariant{};
+		CreateGunEffectByIndex(Variant, Index);
 
-        	UGunEffectBase* GunEffectToLoad = GetGunEffectInsideVariant(Variant);
-        	GunEffectToLoad->SerializeEffect(Ar);
-        	
-        	return Ar;
-        }
-        else
-        {
-	        if (Variant.GetIndex() == 0)
-	        {
-          		return Ar;
-	        }
-	        
-	        UGunEffectBase* GunEffectToSave = GetGunEffectInsideVariant(Variant);
-        	SIZE_T Index = Variant.GetIndex();
-        	
-	        Ar << Index;
-	        GunEffectToSave->SerializeEffect(Ar);
-	        
-	       return Ar;
-        }
+		UGunEffectBase* GunEffectToLoad = GetGunEffectInsideVariant(Variant);
+		GunEffectToLoad->SerializeEffect(Ar);
+
+		return Ar;
+	}
+	else
+	{
+		if (Variant.GetIndex() == 0)
+		{
+			return Ar;
+		}
+
+		UGunEffectBase* GunEffectToSave = GetGunEffectInsideVariant(Variant);
+		SIZE_T Index = Variant.GetIndex();
+
+		Ar << Index;
+		GunEffectToSave->SerializeEffect(Ar);
+
+		return Ar;
+	}
 }
