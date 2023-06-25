@@ -36,7 +36,7 @@ UWeaponComponent::UWeaponComponent()
 void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 {
 	Super::SetupPlayerComponent(InOwningCharacter);
-	
+
 	WeaponArray.SetNum(StaticEnum<EWeapon>()->GetMaxEnumValue());
 
 	if (OwningCharacter->IsLocallyControlled() || OwningCharacter->GetLocalRole() == ROLE_Authority)
@@ -45,25 +45,25 @@ void UWeaponComponent::SetupPlayerComponent(APlayerCharacter* InOwningCharacter)
 		SpawnGun_ServerOrClient(EWeapon::Pistol, OwningCharacter->PistolAnchor);
 
 		APhysGun* PhysGun = static_cast<APhysGun*>(GetWeaponInfo(EWeapon::PhysGun).HeldGun);
-                                                                 	
-        PhysGun->SetPhysicsConstraint(OwningCharacter->GetPhysicsConstraint());
-        PhysGun->SetConstraintDummy(OwningCharacter->GetConstraintDummy());
-        
-        LastGunRotation.Init(OwningCharacter->PhysGunAnchor->GetComponentRotation(), WobblyGunBufferSize);
+
+		PhysGun->SetPhysicsConstraint(OwningCharacter->GetPhysicsConstraint());
+		PhysGun->SetConstraintDummy(OwningCharacter->GetConstraintDummy());
+
+		LastGunRotation.Init(OwningCharacter->PhysGunAnchor->GetComponentRotation(), WobblyGunBufferSize);
 	}
 	else
 	{
-		SpawnGun_SimulatedProxy(EWeapon::PhysGun, OwningCharacter->MultiplayerPhysGunAnchor);	
-		SpawnGun_SimulatedProxy(EWeapon::Pistol, OwningCharacter->MultiplayerPistolAnchor);	
+		SpawnGun_SimulatedProxy(EWeapon::PhysGun, OwningCharacter->MultiplayerPhysGunAnchor);
+		SpawnGun_SimulatedProxy(EWeapon::Pistol, OwningCharacter->MultiplayerPistolAnchor);
 	}
-	
+
 	OnRep_SelectedWeapon();
 }
 
 void UWeaponComponent::SpawnGun_ServerOrClient(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
 {
 	ENSURE_TRUE(OwningCharacter->IsLocallyControlled() || OwningCharacter->GetLocalRole() == ROLE_Authority)
-	
+
 	ENSURE_TRUE(WeaponIndex != EWeapon::None);
 	ENSURE_NOTNULL(VisualComponent);
 
@@ -79,7 +79,7 @@ void UWeaponComponent::SpawnGun_ServerOrClient(EWeapon WeaponIndex, UVisualChild
 void UWeaponComponent::SpawnGun_SimulatedProxy(EWeapon WeaponIndex, UVisualChildActorComponent* VisualComponent)
 {
 	ENSURE_TRUE(!OwningCharacter->IsLocallyControlled())
-	
+
 	ENSURE_TRUE(WeaponIndex != EWeapon::None);
 	ENSURE_NOTNULL(VisualComponent);
 
@@ -100,7 +100,8 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 }
 
 // Called every frame
-void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                     FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -109,16 +110,17 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	{
 		USceneComponent* GunOwner = GetWeaponInfo(SelectedWeaponIndex).HeldGunOwner;
 		AGunBase* Gun = GetWeaponInfo(SelectedWeaponIndex).HeldGun;
-		
-        ENSURE_NOTNULL(Gun)
-        ENSURE_NOTNULL(GunOwner);
-        
-        FRotator CurrentRotation = GunOwner->GetComponentRotation();
-        Gun->SetActorRotation(FMath::Lerp(LastGunRotation[index], Gun->GetActorRotation(), WobblyGunInterpolationStrength));
-        LastGunRotation[index] = CurrentRotation;
-    
-        index++;
-        index %= WobblyGunBufferSize;
+
+		ENSURE_NOTNULL(Gun)
+		ENSURE_NOTNULL(GunOwner);
+
+		FRotator CurrentRotation = GunOwner->GetComponentRotation();
+		Gun->SetActorRotation(FMath::Lerp(LastGunRotation[index], Gun->GetActorRotation(),
+		                                  WobblyGunInterpolationStrength));
+		LastGunRotation[index] = CurrentRotation;
+
+		index++;
+		index %= WobblyGunBufferSize;
 	}
 }
 
@@ -136,7 +138,7 @@ void UWeaponComponent::OnRep_SelectedWeapon()
 		{
 			Weapon.VisualGunOwner->SetHiddenInGame(Index != static_cast<uint8>(SelectedWeaponIndex), true);
 		}
-		
+
 		Index++;
 	}
 	OnWeaponSelected.ExecuteIfBound(SelectedWeaponIndex);
@@ -164,10 +166,6 @@ void UWeaponComponent::Fire(FRotator CharacterRotation)
 		return;
 	}
 
-	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
-	
-	GetWeaponInfo(SelectedWeaponIndex).HeldGun->TriggerClientVFX(CharacterRotation);
-	
 	Server_Fire(CharacterRotation);
 }
 
@@ -182,35 +180,31 @@ void UWeaponComponent::Server_Fire_Implementation(FRotator CharacterRotation)
 	{
 		return;
 	}
-	
+
 	ENSURE_NOTNULL(GetWeaponInfo(SelectedWeaponIndex).HeldGun);
-	
+
 	GunEffectVariant Variant = GetWeaponInfo(SelectedWeaponIndex).HeldGun->Fire(CharacterRotation);
 
 	TArray<uint8> Buffer{};
 	FMemoryWriter Writer{Buffer};
-	
+
 	Writer << Variant;
 
-	FFileHelper::SaveArrayToFile(Buffer, *(FPaths::ProjectSavedDir() + TEXT("TestSave.sav")));
-
-	Buffer.Reset();
-	Variant = {};
-
-	FFileHelper::LoadFileToArray(Buffer, *(FPaths::ProjectSavedDir() + TEXT("TestSave.sav")));
-
-	FMemoryReader Reader{Buffer};
-	Reader << Variant;
-	//MultiCast_OnFired(Variant);
+	MultiCast_OnFired(Buffer);
 }
 
-void UWeaponComponent::MultiCast_OnFired_Implementation(const TArray<uint8>& Array)
+void UWeaponComponent::MultiCast_OnFired_Implementation(const TArray<uint8>& EffectBuffer)
 {
-	if (GetWeaponInfo(SelectedWeaponIndex).VisualGun == nullptr)
-	{
-		return;
-	}
-	GetWeaponInfo(SelectedWeaponIndex).VisualGun->TriggerClientVFX(OwningCharacter->Camera->GetComponentRotation());
+	FMemoryReader Reader{EffectBuffer};
+	GunEffectVariant Variant{};
+         
+	Reader << Variant;
+
+	FWeaponInfo& GothWeaponInfo = GetWeaponInfo(SelectedWeaponIndex);
+
+	AGunBase* GunToUse = GothWeaponInfo.VisualGun != nullptr ? GothWeaponInfo.VisualGun : GothWeaponInfo.HeldGun;
+	
+	GunToUse->TriggerClientVFX(OwningCharacter->Camera->GetComponentRotation(), Variant);
 }
 
 FWeaponInfo& UWeaponComponent::GetWeaponInfo(EWeapon WeaponType)

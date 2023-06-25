@@ -48,7 +48,7 @@ GunEffectVariant APhysGun::Fire(FRotator CharacterRotation)
 	return Effect;
 }
 
-void APhysGun::TriggerClientVFX(FRotator CharacterRotation)
+void APhysGun::TriggerClientVFX(FRotator CharacterRotation, GunEffectVariant Variant)
 {
 	UPhysGunEffect* Effect = NewObject<UPhysGunEffect>();
 

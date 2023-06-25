@@ -16,7 +16,7 @@ public:
 
 	virtual GunEffectVariant Fire(FRotator CharacterRotation);
 
-	virtual void TriggerClientVFX(FRotator CharacterRotation);
+	virtual void TriggerClientVFX(FRotator CharacterRotation, GunEffectVariant Variant);
 
 protected: // VFX
 	

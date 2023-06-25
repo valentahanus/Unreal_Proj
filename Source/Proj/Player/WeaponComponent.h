@@ -103,7 +103,7 @@ public:
 	void Fire(FRotator CharacterRotation);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MultiCast_OnFired(const TArray<uint8>& Array);
+	void MultiCast_OnFired(const TArray<uint8>& EffectBuffer);
 	
 private: // Server -> Client
 

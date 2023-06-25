@@ -12,7 +12,11 @@ GunEffectVariant AGunBase::Fire(FRotator CharacterRotation)
 	return {};
 }
 
-void AGunBase::TriggerClientVFX(FRotator CharacterRotation)
+void AGunBase::TriggerClientVFX(FRotator CharacterRotation, GunEffectVariant Variant)
 {
-	ClientPlayVFX(CharacterRotation, nullptr);
+	UGunEffectBase* EffectToPlay = Variant.GetIndex() != 0
+		? GetGunEffectInsideVariant(Variant)
+		: nullptr;
+	
+	ClientPlayVFX(CharacterRotation, EffectToPlay);
 }

@@ -29,7 +29,7 @@ public:
 	// Fire override
 	virtual GunEffectVariant Fire(FRotator CharacterRotation) override;
 
-	virtual void TriggerClientVFX(FRotator CharacterRotation) override;
+	virtual void TriggerClientVFX(FRotator CharacterRotation, GunEffectVariant Variant) override;
 
 private:
 
