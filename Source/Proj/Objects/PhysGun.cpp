@@ -50,21 +50,14 @@ GunEffectVariant APhysGun::Fire(FRotator CharacterRotation)
 
 void APhysGun::TriggerClientVFX(FRotator CharacterRotation, GunEffectVariant Variant)
 {
-	UPhysGunEffect* Effect = NewObject<UPhysGunEffect>();
-
-	Effect->bIsActive = IsActive();
-	
-	ClientPlayVFX(CharacterRotation, Effect);
-
-	Effect->ConditionalBeginDestroy();
-	Effect = nullptr;
+	ClientPlayVFX(CharacterRotation, GetGunEffectInsideVariant(Variant));
 }
 
 void APhysGun::Drop(FRotator CharacterRotation)
 {
 	PhysicsConstraint->BreakConstraint();
 
-	LOG("Droped")
+	/*LOG("Droped")*/
 }
 
 void APhysGun::PickUp(FRotator CharacterRotation)
@@ -92,7 +85,7 @@ void APhysGun::PickUp(FRotator CharacterRotation)
 	// Action called if it hits something
 	if (!TraceResult.GetActor())
 	{
-		DrawDebugLine
+		/*DrawDebugLine
 		(
 			this->GetWorld(),
 			ShootLocation,
@@ -102,7 +95,7 @@ void APhysGun::PickUp(FRotator CharacterRotation)
 			1,
 			2,
 			4
-		);
+		);*/
 		return;
 	}
 
@@ -117,7 +110,7 @@ void APhysGun::PickUp(FRotator CharacterRotation)
 		Cast<UPrimitiveComponent>(ConstraintDummy),
 		FName()
 	);
-	LOG("Picked up")
+	/*LOG("Picked up")*/
 }
 
 bool APhysGun::IsActive()
